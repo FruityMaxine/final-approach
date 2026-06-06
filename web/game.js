@@ -848,6 +848,7 @@ function syncConfigUI(){
   document.querySelectorAll('.seg-opt[data-diff]').forEach(s=>s.classList.toggle('on',s.dataset.diff===CONFIG.diff));
   document.querySelectorAll('.seg-opt[data-start]').forEach(s=>s.classList.toggle('on',s.dataset.start===CONFIG.start));
   document.querySelectorAll('.seg-opt[data-eng]').forEach(s=>s.classList.toggle('on',+s.dataset.eng===CONFIG.engines));
+  document.querySelectorAll('.seg-opt[data-wx]').forEach(s=>s.classList.toggle('on',s.dataset.wx===CONFIG.weather));
   const ws=$('cfgWindSpeed');if(ws)ws.value=CONFIG.windSpeed;
   const wd=$('cfgWindDir');if(wd)wd.value=CONFIG.windDir;
   $('swFree').classList.toggle('on',CONFIG.freeFlight);
@@ -856,6 +857,7 @@ function syncConfigUI(){
 document.querySelectorAll('.seg-opt[data-diff]').forEach(s=>s.addEventListener('click',()=>{applyDifficulty(s.dataset.diff);syncConfigUI();}));
 document.querySelectorAll('.seg-opt[data-start]').forEach(s=>s.addEventListener('click',()=>{CONFIG.start=s.dataset.start;saveConfig();syncConfigUI();}));
 document.querySelectorAll('.seg-opt[data-eng]').forEach(s=>s.addEventListener('click',()=>{CONFIG.engines=+s.dataset.eng;saveConfig();if(typeof ENGINES!=='undefined'){ENGINES.setCount(CONFIG.engines);resetState();}syncConfigUI();}));
+document.querySelectorAll('.seg-opt[data-wx]').forEach(s=>s.addEventListener('click',()=>{CONFIG.weather=s.dataset.wx;if(typeof WEATHER!=='undefined')WEATHER.preset(CONFIG.weather);saveConfig();syncConfigUI();}));
 $('cfgWindSpeed').addEventListener('input',e=>{CONFIG.windSpeed=+e.target.value;applyConfig();updateWindUI();});
 $('cfgWindDir').addEventListener('input',e=>{CONFIG.windDir=+e.target.value;applyConfig();updateWindUI();});
 $('swFree').addEventListener('click',()=>{CONFIG.freeFlight=!CONFIG.freeFlight;$('swFree').classList.toggle('on',CONFIG.freeFlight);saveConfig();});

@@ -166,6 +166,7 @@ function drawWorld(){
   drawApproachLights(T);
   drawRunway(T);
   drawPAPI();
+  if(typeof drawIMC==='function')drawIMC();   // IMC 仪表气象:云中白化/低能见度雾(覆于外景,HUD 之下)
   drawHUD();
 }
 
@@ -333,7 +334,8 @@ function drawPAPI(){
   for(let i=0;i<4;i++){const p=project(PAPI.x-i*4,PAPI.y+1.3,PAPI.z);if(!p)continue;dot(p,clamp(165/p.z,1.2,5.2),ang>thr[i]?'rgba(255,255,255,.96)':'rgba(255,70,50,.96)',9);}
 }
 
-//------------------ HUD ------------------
+//------------------ HUD + FMC 航路点 ------------------
+const WPTS=[{id:'IAF',z:-9000},{id:'FAF',z:-3500},{id:'RW27',z:0}];   // 简化进近航路点序列
 function drawHUD(){
   const ias=Math.round(S.V*MS_TO_KT),altft=Math.round(S.alt*M_TO_FT),vs=Math.round(S.V*Math.sin(S.gamma)*MS_TO_FPM);
   const dist=(RWY.aim-S.z)/1852,c=getC('--grn');
@@ -345,6 +347,11 @@ function drawHUD(){
   s+='<text x="500" y="580" font-size="13" text-anchor="middle" fill="#9fb">DIST '+(dist>0?dist.toFixed(1):'0.0')+' NM&#160;&#160;·&#160;&#160;G/S '+Math.round(Math.max(0,S.V*Math.cos(S.gamma)-WIND.head)*MS_TO_KT)+'</text>';
   const fp=project(S.x+Math.sin(S.hdg*RAD)*1000,S.alt+Math.tan(S.gamma)*1000,S.z+1000);
   if(fp){const fx=fp.x/W*1000,fy=fp.y/Hh*600;if(fx>120&&fx<880&&fy>140&&fy<520){s+='<g stroke="'+c+'" stroke-width="2" fill="none"><circle cx="'+fx.toFixed(0)+'" cy="'+fy.toFixed(0)+'" r="9"/><line x1="'+(fx-9)+'" y1="'+fy+'" x2="'+(fx-20)+'" y2="'+fy+'"/><line x1="'+(fx+9)+'" y1="'+fy+'" x2="'+(fx+20)+'" y2="'+fy+'"/><line x1="'+fx+'" y1="'+(fy-9)+'" x2="'+fx+'" y2="'+(fy-18)+'"/></g>';}}
+  // FMC:下一航路点 + 距离 + 横向偏离 XTK(接 ILS 中线)
+  const nwp=WPTS.find(w=>w.z>=S.z-50)||WPTS[WPTS.length-1];
+  const wdist=Math.max(0,(nwp.z-S.z)/1852);
+  const xtk=Math.abs(S.x)<0.5?'ON CTR':(Math.abs(S.x)|0)+'m '+(S.x>0?'R':'L');
+  s+='<text x="500" y="42" font-size="13" font-weight="700" text-anchor="middle" fill="#2ad8ff">&#9660; '+nwp.id+'  '+wdist.toFixed(1)+' NM  ·  XTK '+xtk+'</text>';
   s+='</g>';
   hudsvg.innerHTML=s;
 }
