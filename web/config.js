@@ -30,7 +30,7 @@ const STARTS={
   cruise:{ name:'高位切入', z:-14500, alt:820, V:92, label:'7.8 NM · 2700 ft' },
 };
 // 当前配置(localStorage 持久化)
-const CONFIG={ diff:'real', start:'short', windDir:280, windSpeed:8, freeFlight:false, engines:2, weather:'clear', aircraft:'narrow', airport:'vega' };
+const CONFIG={ diff:'real', start:'short', windDir:280, windSpeed:8, freeFlight:false, engines:2, weather:'clear', aircraft:'narrow', airport:'vega', rwySel:0, circleApp:false };
 const CFG_KEY='fa.config';
 
 function curDiff(){ return DIFF[CONFIG.diff]||DIFF.real; }
@@ -38,7 +38,8 @@ function curStart(){ return STARTS[CONFIG.start]||STARTS.short; }
 
 // 由风向/风速(相对 27 跑道,航向 270°)解出顶风/侧风分量,写入 WIND
 function applyWind(){
-  const off=(CONFIG.windDir-270)*RAD;          // 风来向相对跑道
+  const base=(typeof RWY!=='undefined'&&typeof RWY.hdg==='number')?RWY.hdg:270;  // 以选定跑道朝向为基准(对向跑道→顶风↔顺风互换)
+  const off=(CONFIG.windDir-base)*RAD;         // 风来向相对当前跑道
   const ms=CONFIG.windSpeed/MS_TO_KT;
   WIND.head=Math.max(0,ms*Math.cos(off));      // 顶风分量(逆风落地)
   WIND.cross=ms*Math.sin(off);                 // 侧风分量(右正)
@@ -53,7 +54,7 @@ function applyDifficulty(d){
   applyWind();
   saveConfig();
 }
-function applyConfig(){ if(typeof applyAircraft==='function')applyAircraft(CONFIG.aircraft); if(typeof applyAirport==='function')applyAirport(CONFIG.airport); applyWind(); if(typeof WEATHER!=='undefined')WEATHER.preset(CONFIG.weather); saveConfig(); }
+function applyConfig(){ if(typeof applyAircraft==='function')applyAircraft(CONFIG.aircraft); if(typeof applyAirport==='function')applyAirport(CONFIG.airport,CONFIG.rwySel); applyWind(); if(typeof WEATHER!=='undefined')WEATHER.preset(CONFIG.weather); saveConfig(); }
 function saveConfig(){ try{localStorage.setItem(CFG_KEY,JSON.stringify(CONFIG));}catch(_){} }
 function loadConfig(){
   try{const v=JSON.parse(localStorage.getItem(CFG_KEY)||'null');
@@ -67,6 +68,8 @@ function loadConfig(){
       if(['clear','mist','imc','lowvis'].includes(v.weather))CONFIG.weather=v.weather;
       if(typeof AIRCRAFT!=='undefined'&&AIRCRAFT[v.aircraft])CONFIG.aircraft=v.aircraft;
       if(typeof AIRPORTS!=='undefined'&&AIRPORTS[v.airport])CONFIG.airport=v.airport;
+      if(typeof v.rwySel==='number')CONFIG.rwySel=v.rwySel;
+      CONFIG.circleApp=!!v.circleApp;
     }
   }catch(_){}
 }

@@ -98,6 +98,7 @@ function resetState(){
   if(typeof FBW!=='undefined')FBW.reset();
   if(typeof SPATIAL!=='undefined')SPATIAL.reset();
   if(typeof WEATHER!=='undefined'&&WEATHER.resetWx)WEATHER.resetWx();
+  if(typeof RUNWAY!=='undefined'&&RUNWAY.applyCircle)RUNWAY.applyCircle(S);  // 盘旋进近:起始横向偏置(组21 Tick3)
 }
 resetState();
 const cfg={ gyro:false, invertPitch:false, sound:true, turb:true, gyroBase:null, tod:'dusk' };
@@ -904,7 +905,9 @@ document.querySelectorAll('.seg-opt[data-diff]').forEach(s=>s.addEventListener('
 document.querySelectorAll('.seg-opt[data-start]').forEach(s=>s.addEventListener('click',()=>{CONFIG.start=s.dataset.start;saveConfig();syncConfigUI();}));
 document.querySelectorAll('.seg-opt[data-ap]').forEach(s=>s.addEventListener('click',()=>{
   CONFIG.airport=s.dataset.ap;
-  if(typeof applyAirport==='function')applyAirport(CONFIG.airport);   // 逐字段写 RWY + WPTS + PAPI
+  CONFIG.rwySel=0;                                                    // 换机场跑道集不同,复位主跑道
+  if(typeof applyAirport==='function')applyAirport(CONFIG.airport,0); // 逐字段写 RWY + WPTS + PAPI
+  if(typeof applyWind==='function')applyWind();                       // 新跑道朝向 → 风分量重算
   resetState();                                                       // 按新机场重置(标高/航路)
   saveConfig(); syncConfigUI(); updateAirportUI();
 }));
