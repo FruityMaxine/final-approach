@@ -391,3 +391,17 @@ html[data-device=desktop] .sysbtn .kbdhint{display:block;}
 .mk{font-family:var(--mono);font-size:12px;font-weight:600;color:var(--ink);background:linear-gradient(180deg,#222a3b,#11151e);border:1px solid var(--edge2);border-radius:6px;min-width:26px;padding:9px 0;text-align:center;cursor:pointer;transition:.08s;user-select:none;}
 .mk:hover{border-color:var(--edge3);} .mk:active{transform:scale(.88);background:#2a3450;}
 .mk.fnsp{font-size:8.5px;color:var(--ink-dim);} .mk.clr{font-size:9px;color:var(--amb);} .mk.num{color:var(--grn);}
+/* 新手分步教学浮层(Linear 深色一致) */
+#tutOverlay{position:absolute;top:64px;left:50%;transform:translateX(-50%);z-index:10;width:min(86%,440px);
+  background:rgba(10,14,22,.9);border:1px solid var(--edge2);border-radius:12px;padding:12px 14px;
+  backdrop-filter:blur(11px);-webkit-backdrop-filter:blur(11px);box-shadow:0 6px 26px rgba(0,0,0,.55);display:none;}
+#tutOverlay.show{display:block;animation:tutIn .25s ease;}
+@keyframes tutIn{from{opacity:0;transform:translate(-50%,-6px);}to{opacity:1;transform:translate(-50%,0);}}
+.tut-top{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:6px;}
+.tut-step{font-family:var(--mono);font-size:10px;letter-spacing:.12em;color:var(--cyan);}
+.tut-skip{font-family:var(--mono);font-size:10px;color:var(--ink-dim);border:1px solid var(--edge2);border-radius:6px;padding:3px 9px;cursor:pointer;transition:.13s;}
+.tut-skip:hover{color:var(--ink);border-color:var(--edge3);}
+.tut-title{font-size:15px;font-weight:700;color:var(--ink);margin-bottom:3px;letter-spacing:.01em;}
+.tut-hint{font-size:12px;line-height:1.55;color:var(--ink-dim);}
+.tut-bar{height:4px;border-radius:3px;background:#1a2030;margin-top:9px;overflow:hidden;}
+.tut-bar>i{display:block;height:100%;background:linear-gradient(90deg,var(--cyan),var(--grn));transition:width .35s ease;width:0;}

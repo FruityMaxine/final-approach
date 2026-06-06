@@ -787,6 +787,7 @@ function loop(now){
     if(acc>STEP)acc=0;
     if(typeof FAILURES!=='undefined'){ FAILURES.step(dt); if(S.started&&S.phase!=='ended')FAILURES.randomInject(dt); }   // 推进故障连锁 + MTBF 随机注入
     if(typeof SPATIAL!=='undefined')SPATIAL.update(dt,S);   // 空间迷向错觉(只偏外景,PFD 真实)
+    if(typeof TUTORIAL!=='undefined')TUTORIAL.update(S,dt); // 新手教学逐帧检测完成→自动进下一步
     Sound.update(dt); updateMaster();
     syncRuntimeUI();drawWorld();drawPFD();drawFlightDirector();
   }catch(err){console.error(err);}
@@ -812,6 +813,7 @@ function startFlight(){
   Sound.init();Sound.resume();Sound.setMaster();
   revealTags(4500);
   setTimeout(()=>Sound.say('cleared to land, runway two seven'),300);
+  if(typeof TUTORIAL!=='undefined'&&typeof SYS!=='undefined'&&SYS.get('features','tutorial'))TUTORIAL.start();
 }
 $('startBtn').addEventListener('click',startFlight);
 $('helpHint').addEventListener('click',()=>helpEl.classList.add('show'));
@@ -826,6 +828,14 @@ $('swInvert').addEventListener('click',()=>{cfg.invertPitch=!cfg.invertPitch;$('
 $('swTurb').addEventListener('click',()=>{cfg.turb=!cfg.turb;$('swTurb').classList.toggle('on',cfg.turb);if(typeof SYS!=='undefined')SYS.set('features','turbulence',cfg.turb);if(typeof applyConfig==='function')applyConfig();});
 $('swClean').addEventListener('click',()=>{hudAutoHide=!hudAutoHide;$('swClean').classList.toggle('on',hudAutoHide);if(typeof SYS!=='undefined')SYS.set('features','cleanHud',hudAutoHide);if(hudAutoHide)revealTags();else{clearTimeout(_tagsTimer);appEl.classList.remove('tags-hidden');}});
 window.setHudClean=function(on){hudAutoHide=on;$('swClean').classList.toggle('on',on);if(on)revealTags();else{clearTimeout(_tagsTimer);appEl.classList.remove('tags-hidden');}};   // 供系统总控面板调
+// 新手教学开关:开则飞行中即起教学,关则收起浮层(系统总控面板亦可调,见 systems.js)
+$('swTut').addEventListener('click',()=>{
+  const on=!$('swTut').classList.contains('on');
+  $('swTut').classList.toggle('on',on);
+  if(typeof SYS!=='undefined')SYS.set('features','tutorial',on);
+  if(typeof TUTORIAL!=='undefined'){ if(on&&S.started)TUTORIAL.start(); else if(!on)TUTORIAL.stop(); }
+});
+window.setTutorial=function(on){ $('swTut').classList.toggle('on',on); if(typeof TUTORIAL!=='undefined'){ if(on&&S.started)TUTORIAL.start(); else if(!on)TUTORIAL.stop(); } };
 // 设备三屏手动覆盖
 document.querySelectorAll('.seg-opt[data-dev]').forEach(s=>{
   s.addEventListener('click',()=>{
@@ -888,6 +898,7 @@ if(typeof SYS!=='undefined'){
   $('swTurb').classList.toggle('on',cfg.turb);
   $('swClean').classList.toggle('on',hudAutoHide);
   $('swSound').classList.toggle('on',cfg.sound);
+  $('swTut').classList.toggle('on',SYS.get('features','tutorial'));
   if(typeof applyConfig==='function')applyConfig();
 }
 // 多发引擎:按配置初始化发动机数(默认 2,可配 4)+ 渲染 EICAS

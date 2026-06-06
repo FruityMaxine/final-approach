@@ -18,6 +18,7 @@ function applySysChange(cat,id){
     if(id==='sound'&&typeof cfg!=='undefined'){ cfg.sound=on; if(typeof Sound!=='undefined'&&Sound.setMaster)Sound.setMaster(); if(typeof setSoundIcon==='function')setSoundIcon(); }
     if(id==='freeFlight'&&typeof CONFIG!=='undefined'){ CONFIG.freeFlight=on; }
     if(id==='cleanHud'&&typeof window!=='undefined'&&typeof window.setHudClean==='function')window.setHudClean(on);
+    if(id==='tutorial'&&typeof window!=='undefined'&&typeof window.setTutorial==='function')window.setTutorial(on);
     // fbw/emmaAssist/fpsHud 逐帧读 SYS,自动生效
   }
   if(cat==='env'){ if(id==='icing'&&typeof WEATHER!=='undefined'&&!on)WEATHER.deIce&&0; }  // env 逐帧读,自动生效
