@@ -92,6 +92,7 @@ function resetState(){
   if(typeof ENGINES!=='undefined'&&ENGINES.list.length)ENGINES.reset();
   if(typeof FUEL!=='undefined')FUEL.reset();
   if(typeof HYD!=='undefined')HYD.reset();
+  if(typeof ELEC!=='undefined')ELEC.reset();
 }
 resetState();
 const cfg={ gyro:false, invertPitch:false, sound:true, turb:true, gyroBase:null, tod:'dusk' };
@@ -370,7 +371,7 @@ function updatePhysics(dt){
   if(Math.abs(S.rollIn)<0.02)S.roll-=clamp(S.roll,-1,1)*Math.min(1,dt*1.8)*(Math.abs(S.roll)>0.3?1:0.5);
   S.roll=clamp(S.roll,-45,45);
   // 多发引擎:各发独立 spool/状态机(engines.js);S.N1 取队均(供 UI/EMMA/声音向后兼容)
-  if(typeof ENGINES!=='undefined'&&ENGINES.list.length){ ENGINES.step(dt,S.throttle); if(typeof FUEL!=='undefined')FUEL.step(dt); if(typeof HYD!=='undefined')HYD.step(dt); S.N1=ENGINES.avgN1(); }
+  if(typeof ENGINES!=='undefined'&&ENGINES.list.length){ ENGINES.step(dt,S.throttle); if(typeof FUEL!=='undefined')FUEL.step(dt); if(typeof HYD!=='undefined')HYD.step(dt); if(typeof ELEC!=='undefined')ELEC.step(dt); S.N1=ENGINES.avgN1(); }
   else { const spool=(S.throttle>S.N1?0.55:0.95); S.N1=clamp(S.N1+(S.throttle-S.N1)*Math.min(1,dt*spool*2.4),0,1); }
   // 扰流板自动展开:需 B 系统液压(液压失→不可展)
   if(S.onGround&&S.spoilerArmed&&!S.spoilerOut&&(typeof HYD==='undefined'||HYD.spoilerOK())){S.spoilerOut=true;syncSysUI();}
@@ -426,6 +427,10 @@ function updatePhysics(dt){
     const d=DF(),offRwy=Math.abs(S.x)>RWY.W/2,grass=offRwy?d.grassMu:0;
     const bg=(typeof HYD!=='undefined')?HYD.brakeGain():1;
     const fric=(0.02+grass+(S.brake?0.35*bg:0))*W;
+    // 爆胎:滑跑时持续拉向爆胎(右)侧 + 该侧刹车失效
+    if(typeof FAILURES!=='undefined'&&FAILURES.reg.tireBurst&&FAILURES.reg.tireBurst.active){
+      S.hdg=clamp(S.hdg+14*dt,-25,25); S.x+=2.4*dt*S.V*0.04;
+    }
     const Vdot=(T-fric-D)/AC.m;
     S.V=Math.max(0,S.V+Vdot*dt);
     S.z+=S.V*dt; S.x+=(S.V*Math.sin(S.hdg*RAD)+crosswindAt(S.alt)*0.7)*dt;
@@ -579,13 +584,24 @@ function resizePFD(){const r=pfd.parentElement.getBoundingClientRect();PW=r.widt
 function drawPFD(){
   const r=pfd.parentElement.getBoundingClientRect();if(Math.abs(r.width-PW)>1||Math.abs(r.height-PH)>1)resizePFD();
   const ctx=pctx;ctx.clearRect(0,0,PW,PH);ctx.fillStyle='#04060a';ctx.fillRect(0,0,PW,PH);
+  // 电气失效:PFD 失电 → 黑屏 + 红 X "ATT FAIL"
+  if(typeof ELEC!=='undefined'&&!ELEC.pfdPower()){
+    ctx.fillStyle='#000';ctx.fillRect(0,0,PW,PH);
+    ctx.strokeStyle='#ff4a3d';ctx.lineWidth=3;ctx.beginPath();ctx.moveTo(PW*0.2,PH*0.2);ctx.lineTo(PW*0.8,PH*0.8);ctx.moveTo(PW*0.8,PH*0.2);ctx.lineTo(PW*0.2,PH*0.8);ctx.stroke();
+    ctx.fillStyle='#ff4a3d';ctx.font='700 13px '+MONO;ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText('ATT FAIL',PW/2,PH/2);
+    return;
+  }
   const fmaH=14,tw=Math.min(46,PW*0.145),bh=Math.min(26,PH*0.13),aiX=tw+5,aiY=fmaH+3,aiW=PW-tw*2-10,aiH=PH-bh-fmaH-8;
+  // AC 失电(电池备份):降亮度运行(degraded)
+  const dim=(typeof ELEC!=='undefined'&&!ELEC.acPower());
+  if(dim)ctx.globalAlpha=0.55;
   drawAttitude(ctx,aiX,aiY,aiW,aiH);
   drawSpeedTape(ctx,3,aiY,tw-2,aiH);
   drawAltTape(ctx,PW-tw+1,aiY,tw-5,aiH);
   drawHeadingTape(ctx,aiX,PH-bh-2,aiW,bh);
   drawILS(ctx,aiX,aiY,aiW,aiH);
   drawFMA(ctx,fmaH);
+  ctx.globalAlpha=1;
 }
 function drawFMA(ctx,h){
   ctx.fillStyle='rgba(6,10,16,.92)';ctx.fillRect(0,0,PW,h);
@@ -743,7 +759,7 @@ function loop(now){
     pollInputs();acc+=dt;let n=0;
     while(acc>=STEP&&n<8){if(ap.level!=='off')autopilot(STEP);updatePhysics(STEP);acc-=STEP;n++;}
     if(acc>STEP)acc=0;
-    if(typeof FAILURES!=='undefined')FAILURES.step(dt);       // 推进故障连锁
+    if(typeof FAILURES!=='undefined'){ FAILURES.step(dt); if(S.started&&S.phase!=='ended')FAILURES.randomInject(dt); }   // 推进故障连锁 + MTBF 随机注入
     Sound.update(dt); updateMaster();
     syncRuntimeUI();drawWorld();drawPFD();drawFlightDirector();
   }catch(err){console.error(err);}

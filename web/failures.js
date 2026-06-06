@@ -55,8 +55,27 @@ FAILURES.register('fuelLeak', { sys:'FUEL', msg:'FUEL LEAK', level:'caution',
 FAILURES.register('hydFail',  { sys:'HYD',  msg:'HYD A LO PR', level:'caution',
   trigger(){ if(typeof HYD!=='undefined')HYD.fail('A',true); },
   clear(){ if(typeof HYD!=='undefined')HYD.fail('A',false); } });
-FAILURES.register('elecFail', { sys:'ELEC', msg:'ELEC FAULT', level:'caution' });   // Tick5 填电气
-FAILURES.register('tireBurst',{ sys:'GEAR', msg:'R TIRE BURST',level:'caution' });  // Tick5 填爆胎
+FAILURES.register('elecFail', { sys:'ELEC', msg:'ELEC ESS BUS', level:'warning',
+  trigger(){ if(typeof ELEC!=='undefined')ELEC.fail(true); },
+  clear(){ if(typeof ELEC!=='undefined')ELEC.fail(false); } });
+FAILURES.register('tireBurst',{ sys:'GEAR', msg:'R TIRE BURST',level:'caution' });  // 物理在 game.js 地面分支读 active
+
+// MTBF 随机故障注入(泊松):按难度概率随机触发未激活故障。需 SYS.env.randomFailures 开。
+FAILURES._racc=0;
+FAILURES.randomInject=function(dt){
+  if(typeof SYS!=='undefined'&&!SYS.get('env','randomFailures'))return;
+  let rate=0.0008;  // 默认每秒触发概率(基)
+  if(typeof curDiff==='function'){ const d=curDiff(); rate=(d.failRate!=null?d.failRate:0.0008); }
+  if(rate<=0)return;
+  this._racc+=dt;
+  if(this._racc<1)return;  // 每秒判定一次
+  this._racc=0;
+  if(Math.random()<rate){
+    const idle=this.order.filter(id=>!this.reg[id].active);
+    if(idle.length){ const pick=idle[Math.floor(Math.random()*idle.length)]; this.trigger(pick);
+      if(typeof showCallout==='function')showCallout('FAILURE · '+this.reg[pick].msg,getC('--red')); }
+  }
+};
 
 if(typeof window!=='undefined')window.FAILURES=FAILURES;
 

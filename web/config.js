@@ -10,17 +10,17 @@ const DIFF={
   rookie:{ name:'新手', windSpeed:4, gust:0.35, shear:false, emmaHint:true,
            stallMarginKt:9,          // 失速速度再降的余度(越大越不易失速)
            veerEnd:16, overflyEnd:2400, grassMu:0.06,
-           crashFpm:1300, crashRoll:15, crashPitch:16, crashVkt:92,
+           crashFpm:1300, crashRoll:15, crashPitch:16, crashVkt:92, failRate:0,
            grade:{greased:200,firm:520,hard:820} },   // 讲评宽容
   real:{   name:'真实', windSpeed:8, gust:1.0, shear:false, emmaHint:false,
            stallMarginKt:0,
            veerEnd:9, overflyEnd:1500, grassMu:0.10,
-           crashFpm:1000, crashRoll:11, crashPitch:14, crashVkt:100,
+           crashFpm:1000, crashRoll:11, crashPitch:14, crashVkt:100, failRate:0.004,
            grade:{greased:170,firm:360,hard:600} },
   hard:{   name:'硬核', windSpeed:16, gust:1.7, shear:true, emmaHint:false,
            stallMarginKt:-3,
            veerEnd:5, overflyEnd:900, grassMu:0.14,
-           crashFpm:850, crashRoll:9, crashPitch:13, crashVkt:104,
+           crashFpm:850, crashRoll:9, crashPitch:13, crashVkt:104, failRate:0.02,
            grade:{greased:150,firm:300,hard:540} },
 };
 // 起始位置:延长完整飞行体验,别一上来就贴地。z 负=跑道前距离(m),alt(m),V(m/s)
