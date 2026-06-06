@@ -752,9 +752,19 @@ function updateMaster(){
 if(mWarn)mWarn.addEventListener('click',()=>{masterAck.warn=true;updateMaster();});
 if(mCaut)mCaut.addEventListener('click',()=>{masterAck.caut=true;updateMaster();});
 
+// FPS 计数(滑动平均)+ 渲染统计显示
+let _fps=0,_fpsAcc=0,_fpsN=0;const fpsHud=$('fpsHud');
+function updateFpsHud(){
+  if(!fpsHud)return;
+  const on=(typeof SYS!=='undefined'&&SYS.get('features','fpsHud'));
+  fpsHud.style.display=on?'block':'none';
+  if(on){const rs=(typeof RSTATS!=='undefined')?RSTATS:{gen:0,drawn:0,culled:0};
+    fpsHud.textContent='FPS '+_fps+' · 对象 '+rs.drawn+'/'+rs.gen+' (剔'+rs.culled+')';}
+}
 let last=performance.now(),acc=0;const STEP=1/120;
 function loop(now){
   let dt=(now-last)/1000;last=now;if(dt>0.1)dt=0.1;
+  _fpsAcc+=dt;_fpsN++;if(_fpsAcc>=0.5){_fps=Math.round(_fpsN/_fpsAcc);_fpsAcc=0;_fpsN=0;updateFpsHud();}
   try{
     pollInputs();acc+=dt;let n=0;
     while(acc>=STEP&&n<8){if(ap.level!=='off')autopilot(STEP);updatePhysics(STEP);acc-=STEP;n++;}

@@ -31,6 +31,7 @@ SYS.register('features','cleanHud',  {on:true, label:'精简飞行视野',desc:'
 SYS.register('features','emmaAssist',{on:true, label:'EMMA AI 副驾',desc:'分轴接管 / 辅助驾驶'});
 SYS.register('features','sound',     {on:true, label:'声音',       desc:'发动机 / 风噪 / 语音回报'});
 SYS.register('features','fuelSystem',{on:true, label:'燃油系统',   desc:'三油箱耗油/泵/交输/饥饿熄火(关=无限油)'});
+SYS.register('features','fpsHud',    {on:false,label:'FPS / 渲染统计',desc:'显示帧率+绘制对象数(调试)'});
 
 // —— 环境(随难度/天气) ——
 SYS.register('env','windShear',{on:false,label:'风切变',     desc:'低空顶风骤变(硬核档自动开)'});

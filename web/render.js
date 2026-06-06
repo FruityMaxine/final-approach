@@ -221,24 +221,45 @@ function drawTerrain(T){
 function hexRgb(h){const n=parseInt(h.slice(1),16);return ((n>>16)&255)+','+((n>>8)&255)+','+(n&255);}
 
 //------------------ 跑道两侧布景:建筑/树 ------------------
+// 渲染统计(量化) + 优化开关(A/B 对比)
+const RSTATS={gen:0,drawn:0,culled:0};
+const OPT={cull:true,lod:true};
+if(typeof window!=='undefined'){window.RSTATS=RSTATS;window.OPT=OPT;}
+// 单建筑:视锥剔除 + 距离 LOD(近完整+窗 / 中无窗 / 远单面)
+function drawBuilding(o,T){
+  const c=project(o.x,o.h*0.5,o.z); if(!c){RSTATS.culled++;return;}
+  if(OPT.cull){
+    if(c.x<-80||c.x>W+80||c.y<-80||c.y>Hh+80){RSTATS.culled++;return;}   // 屏外剔除
+    if(focal*Math.max(o.w,o.h)/c.z<2.2){RSTATS.culled++;return;}          // 过小剔除
+  }
+  const top=(o.lit>0.5)?T.bldLit:T.bld;
+  if(OPT.lod&&c.z>2200){                                                  // 远:单前面
+    fillPoly3d([[o.x-o.w/2,0,o.z-o.d/2],[o.x+o.w/2,0,o.z-o.d/2],[o.x+o.w/2,o.h,o.z-o.d/2],[o.x-o.w/2,o.h,o.z-o.d/2]],T.bld);
+  }else if(OPT.lod&&c.z>900){                                            // 中:5面无窗
+    worldBox(o.x-o.w/2,o.x+o.w/2,o.z-o.d/2,o.z+o.d/2,o.h,top,T.bldLit,T.bld,null);
+  }else{                                                                 // 近:完整+窗
+    worldBox(o.x-o.w/2,o.x+o.w/2,o.z-o.d/2,o.z+o.d/2,o.h,top,T.bldLit,T.bld,(T.lightBoost>0.7&&o.h>20?T.win:null));
+  }
+  RSTATS.drawn++;
+}
 function drawScenery(T){
-  // 程序化连续世界(per-cell hash)替代固定 46 对象;退化时回落 SCENERY
   const objs=(typeof WORLDGEN!=='undefined')?WORLDGEN.cellsAround(S.x,S.z,4200):SCENERY;
-  // 城市道路网格(沿 cell 边,faint)
+  RSTATS.gen=objs.length;RSTATS.drawn=0;RSTATS.culled=0;
   const C=(typeof WORLDGEN!=='undefined')?WORLDGEN.CELL:200, near=S.z+NEAR, far=Math.min(S.z+4200,5600);
   for(let z=Math.ceil(near/C)*C; z<far; z+=C){ if(z>-260&&z<3600)groundLine(-1300,z,1300,z,T.grid+'0.18)',1); }
-  // 远→近(画家算法)
-  objs.sort((a,b)=>b.z-a.z);
+  objs.sort((a,b)=>b.z-a.z);   // 远→近 画家算法
   for(const o of objs){
-    if(o.z<S.z+NEAR||o.z-S.z>4200)continue;            // 剔除相机后/过远
-    if(o.k==='b'){
-      const lit=(o.lit>0.5),top=lit?T.bldLit:T.bld;
-      worldBox(o.x-o.w/2,o.x+o.w/2,o.z-o.d/2,o.z+o.d/2,o.h,top,T.bldLit,T.bld,(T.lightBoost>0.7&&o.h>20?T.win:null));
-    }else{
-      const b=project(o.x,0,o.z),tp=project(o.x,o.h,o.z);if(!b||!tp)continue;
-      const wd=clamp(220/b.z,1,9);
+    if(o.z<S.z+NEAR||o.z-S.z>4200){RSTATS.culled++;continue;}
+    if(o.k==='b'){ drawBuilding(o,T); }
+    else {        // 树:近锥形 / 远点(LOD)
+      const b=project(o.x,0,o.z);if(!b){RSTATS.culled++;continue;}
+      if(OPT.cull&&(b.x<-40||b.x>W+40)){RSTATS.culled++;continue;}
       wctx.fillStyle=T===TOD.night?'#0d1a0e':'#2f4a24';
+      if(OPT.lod&&b.z>1800){dot(b,clamp(170/b.z,0.6,2),wctx.fillStyle,0);RSTATS.drawn++;continue;}
+      const tp=project(o.x,o.h,o.z);if(!tp){RSTATS.culled++;continue;}
+      const wd=clamp(220/b.z,1,9);
       wctx.beginPath();wctx.moveTo(tp.x,tp.y);wctx.lineTo(b.x-wd,b.y);wctx.lineTo(b.x+wd,b.y);wctx.closePath();wctx.fill();
+      RSTATS.drawn++;
     }
   }
 }
