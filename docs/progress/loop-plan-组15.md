@@ -34,5 +34,5 @@ betterloop-auditor opus 4/4 PASS。SYS.list(cat)返[{id,on,label,desc}]、PANELS
 - [x] Tick1 计划(本文件+auditor 4/4 PASS+接口核实) — 2026-06-06
 - [ ] Tick2 v0.22 系统总控面板
 - [x] Tick3 v0.23 MCDU旗舰件★(mcdu.js ~190行;12 LSK+QWERTY+数字+12功能键+12页CDU;字母→scratchpad回显+翻页真切页+LSK写行实测PASS) — 2026-06-06
-- [ ] Tick4 v0.24 MCDU功能逻辑
+- [x] Tick4 v0.24 MCDU功能逻辑(fmgc状态+MCDU_FIELDS校验注册表;INIT风→applyWind真改WIND.head;PERF VAPP;格式/越界拒收;F-PLN SPD/ALT列;闭环实测PASS) — 2026-06-06
 - [ ] Tick5 v0.25 新手教学(收官)

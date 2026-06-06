@@ -11,6 +11,8 @@
 const MCDU={
   label:'MCDU',
   page:'FPLN', scratch:'', msg:'', entries:{},
+  // FMGC 状态:MCDU 输入写此,页面 render 读此显已输入值(青色 ent);部分联动真仿真。
+  fmgc:{ costIndex:null, crzFL:350, vapp:null, wind:null },
 
   // —— 实时仿真读数(防御式:模块未就绪给占位) ——
   _kias(){ return (typeof S!=='undefined'&&typeof MS_TO_KT!=='undefined')?Math.round(S.V*MS_TO_KT):0; },
@@ -21,7 +23,7 @@ const MCDU={
   _distRW(){ return (typeof S!=='undefined')?Math.max(0,(-S.z)/1852).toFixed(1):'--'; },
   _hdg(){ return (typeof S!=='undefined')?Math.round((270+S.hdg+360)%360):270; },
 
-  // —— LSK 行写入(本 tick 雏形:scratchpad→行;空 scratchpad 点已填行取回) ——
+  // —— LSK 行写入 ——
   ent(lsk){ const e=this.entries[this.page]; return e?e[lsk]:undefined; },
   setPage(p){ if(this.pages[p]){ this.page=p; this.msg=''; } },
   key(k){
@@ -33,7 +35,17 @@ const MCDU={
     if(this.scratch.length>22)this.scratch=this.scratch.slice(0,22);
     this.msg='';
   },
+  // 功能字段已提交值的显示(青色 ent);无则返 null(render 用页面默认占位)
+  fieldDisp(id){ const f=MCDU_FIELDS[this.page]; if(f&&f[id]&&f[id].disp)return f[id].disp(); return null; },
   lsk(id){
+    const ff=MCDU_FIELDS[this.page], f=ff&&ff[id];
+    if(f){                                              // —— 功能字段:解析 + 格式校验 + 写仿真 ——
+      if(!this.scratch){ if(f.clear){f.clear();this.msg='';} else this.msg='NOT ALLOWED'; return; }
+      const res=f.commit(this.scratch);
+      if(res&&res.ok){ this.scratch=''; this.msg=''; }
+      else this.msg=(res&&res.err)||'FORMAT ERROR';     // 拒收,保留 scratchpad
+      return;
+    }
     if(this.scratch){ (this.entries[this.page]=this.entries[this.page]||{})[id]=this.scratch; this.scratch=''; }
     else if(this.ent(id)!=null){ this.scratch=this.ent(id); delete this.entries[this.page][id]; }
     else this.msg='NOT ALLOWED';
@@ -48,7 +60,8 @@ const MCDU={
     for(let i=0;i<6;i++){
       const r=d.rows[i]||{};
       h+='<div class="cdu-line"><div class="cdu-lbl l">'+(r.ll||'')+'</div><div class="cdu-lbl r">'+(r.rl||'')+'</div></div>';
-      const le=this.ent((i+1)+'L'), re=this.ent((i+1)+'R');
+      const lf=this.fieldDisp((i+1)+'L'), rf=this.fieldDisp((i+1)+'R');
+      const le=(lf!=null?lf:this.ent((i+1)+'L')), re=(rf!=null?rf:this.ent((i+1)+'R'));
       const lv=(le!=null?le:(r.lv||'')), rv=(re!=null?re:(r.rv||''));
       h+='<div class="cdu-line"><div class="cdu-val l '+(le!=null?'ent':(r.lc||''))+'">'+lv+'</div>'
         +'<div class="cdu-val r '+(re!=null?'ent':(r.rc||''))+'">'+rv+'</div></div>';
@@ -58,7 +71,7 @@ const MCDU={
     scr.innerHTML=h;
     if(host){
       host.querySelectorAll('.fnk').forEach(f=>f.classList.toggle('on',f.dataset.page===this.page));
-      host.querySelectorAll('.lsk').forEach(l=>l.classList.toggle('has',this.ent(l.dataset.lsk)!=null));
+      host.querySelectorAll('.lsk').forEach(l=>l.classList.toggle('has',this.fieldDisp(l.dataset.lsk)!=null||this.ent(l.dataset.lsk)!=null));
     }
   },
 
@@ -108,20 +121,22 @@ MCDU.pages={
     {ll:'SELECT DESIRED SYSTEM'}, {rv:'RETURN>'} ]}; },
   INIT(){ return {title:'INIT', rows:[
     {ll:'CO RTE', lv:'________', rl:'FROM/TO', rv:'ZSPD/ZSSS'},
-    {ll:'ALTN/CO RTE', lv:'NONE', rl:'', rv:'INIT REQUEST>'},
+    {ll:'COST INDEX', lv:'___'},                                  // 2L 功能:成本指数
+    {ll:'CRZ FL/TEMP', lv:'FL350/-54°', rl:'TROPO', rv:'36090'},  // 3L 功能:巡航高度层
+    {ll:'MAG WIND °/KT', lv:'___°/__', rl:'GND TEMP', rv:'+15°'}, // 4L 功能:磁航向风(写仿真)
     {ll:'FLT NBR', lv:'FA0727'},
-    {ll:'LAT', lv:'31°08.5N', rl:'LONG', rv:'121°48.5E'},
-    {ll:'COST INDEX', lv:'___', rl:'WIND/TEMP>', rv:''},
-    {ll:'CRZ FL/TEMP', lv:'FL350/-54°', rl:'TROPO', rv:'36090'} ]}; },
+    {ll:'IRS', lv:'ALIGNED', rl:'', rv:'ALIGN IRS>'} ]}; },
   FPLN(){ const W=(typeof WPTS!=='undefined')?WPTS:[], rows=[];
+    const PROF={IAF:'210/3000', FAF:'160/1500', RW27:'140/13'};   // 各航路点目标 SPD/ALT 剖面
     for(let i=0;i<W.length&&i<5;i++){ const w=W[i], d=(typeof S!=='undefined')?((w.z-S.z)/1852):0;
-      rows.push({ll:i===0?'FROM':'', lv:w.id, lc:'blu', rl:'DIST', rv:(d>0?d.toFixed(1):'0.0')+'NM'}); }
+      rows.push({ ll:(i===0?'':'')+ (d>0?d.toFixed(1)+'NM':'PASSED'), rl:'SPD/ALT',
+                  lv:w.id, lc:'blu', rv:(PROF[w.id]||'---/----') }); }
     rows.push({ll:'', lv:'------END------'});
     return {title:'F-PLN  '+this._altft()+'FT', rows}; },
   PERF(){ return {title:'PERF APPR', rows:[
     {ll:'QNH', lv:'1013', rl:'TEMP', rv:'+15°'},
-    {ll:'MAG WIND', lv:'280°/08'},
-    {ll:'VLS', lv:'132', rl:'VAPP', rv:'140'},
+    {ll:'VAPP', lv:'140', rl:'VLS', rv:'132'},                    // 2L 功能:进近速度 VAPP
+    {ll:'FLAPS/THS', lv:'FULL/UP'},
     {ll:'MDA', lv:'____', rl:'DH', rv:'200'},
     {ll:'LDG CONF', lv:'FULL'},
     {lv:'<GO AROUND', rv:'NEXT PHASE>'} ]}; },
@@ -168,6 +183,39 @@ MCDU.pages={
     {ll:'PAPI', lv:'3.0°'},
     {},
     {ll:'ALTN', lv:'ZSSS'} ]}; },
+};
+
+//==================================================================
+// 功能字段注册表:页面+LSK → {commit(raw)→{ok|err}, disp()→已提交显示, clear()}
+//   解析 + 格式校验(非法拒收 FORMAT ERROR)+ 写 FMGC / 真仿真。闭环非纯显示。
+//==================================================================
+const F=MCDU.fmgc;
+const MCDU_FIELDS={
+  INIT:{
+    // 2L 成本指数:0-999 整数
+    '2L':{ commit(raw){ if(!/^\d{1,3}$/.test(raw))return{ok:false}; F.costIndex=+raw; return{ok:true}; },
+           disp(){ return F.costIndex!=null?String(F.costIndex):null; },
+           clear(){ F.costIndex=null; } },
+    // 3L 巡航高度层:"FL350" 或 "350"(100-430)
+    '3L':{ commit(raw){ const m=raw.match(/^(?:FL)?(\d{2,3})$/); if(!m)return{ok:false,err:'FORMAT ERROR'};
+             const fl=+m[1]; if(fl<10||fl>430)return{ok:false,err:'ENTRY OUT OF RANGE'}; F.crzFL=fl; return{ok:true}; },
+           disp(){ return 'FL'+F.crzFL+'/-54°'; }, clear(){ F.crzFL=350; } },
+    // 4L 磁航向风 "270/12":写 CONFIG.windDir/windSpeed + applyWind() 真改 WIND 分量
+    '4L':{ commit(raw){ const m=raw.match(/^(\d{1,3})\/(\d{1,3})$/); if(!m)return{ok:false,err:'FORMAT ERROR'};
+             const dir=+m[1], spd=+m[2]; if(dir>360||spd>99)return{ok:false,err:'ENTRY OUT OF RANGE'};
+             F.wind={dir,spd};
+             if(typeof CONFIG!=='undefined'){ CONFIG.windDir=dir; CONFIG.windSpeed=spd;
+               if(typeof applyWind==='function')applyWind(); if(typeof saveConfig==='function')saveConfig(); }
+             return{ok:true}; },
+           disp(){ return F.wind?(String(F.wind.dir).padStart(3,'0')+'°/'+String(F.wind.spd).padStart(2,'0')):null; },
+           clear(){ F.wind=null; } },
+  },
+  PERF:{
+    // 2L 进近速度 VAPP:80-220 kt
+    '2L':{ commit(raw){ if(!/^\d{2,3}$/.test(raw))return{ok:false,err:'FORMAT ERROR'};
+             const v=+raw; if(v<80||v>220)return{ok:false,err:'ENTRY OUT OF RANGE'}; F.vapp=v; return{ok:true}; },
+           disp(){ return F.vapp!=null?String(F.vapp):null; }, clear(){ F.vapp=null; } },
+  },
 };
 
 if(typeof PANELS!=='undefined')PANELS.register('mcdu',MCDU);
