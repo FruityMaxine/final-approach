@@ -222,13 +222,19 @@ function hexRgb(h){const n=parseInt(h.slice(1),16);return ((n>>16)&255)+','+((n>
 
 //------------------ 跑道两侧布景:建筑/树 ------------------
 function drawScenery(T){
-  for(const o of SCENERY){
-    if(o.z<S.z+30||o.z-S.z>5600)continue;            // 剔除相机后/过远
+  // 程序化连续世界(per-cell hash)替代固定 46 对象;退化时回落 SCENERY
+  const objs=(typeof WORLDGEN!=='undefined')?WORLDGEN.cellsAround(S.x,S.z,4200):SCENERY;
+  // 城市道路网格(沿 cell 边,faint)
+  const C=(typeof WORLDGEN!=='undefined')?WORLDGEN.CELL:200, near=S.z+NEAR, far=Math.min(S.z+4200,5600);
+  for(let z=Math.ceil(near/C)*C; z<far; z+=C){ if(z>-260&&z<3600)groundLine(-1300,z,1300,z,T.grid+'0.18)',1); }
+  // 远→近(画家算法)
+  objs.sort((a,b)=>b.z-a.z);
+  for(const o of objs){
+    if(o.z<S.z+NEAR||o.z-S.z>4200)continue;            // 剔除相机后/过远
     if(o.k==='b'){
-      const lit=(o.seed>0.5),top=lit?T.bldLit:T.bld;
-      worldBox(o.x-o.w/2,o.x+o.w/2,o.z-o.d/2,o.z+o.d/2,o.h,top,T.bldLit,T.bld,(T.lightBoost>0.7?T.win:null));
+      const lit=(o.lit>0.5),top=lit?T.bldLit:T.bld;
+      worldBox(o.x-o.w/2,o.x+o.w/2,o.z-o.d/2,o.z+o.d/2,o.h,top,T.bldLit,T.bld,(T.lightBoost>0.7&&o.h>20?T.win:null));
     }else{
-      // 树:锥形(底盘+绿冠)
       const b=project(o.x,0,o.z),tp=project(o.x,o.h,o.z);if(!b||!tp)continue;
       const wd=clamp(220/b.z,1,9);
       wctx.fillStyle=T===TOD.night?'#0d1a0e':'#2f4a24';
