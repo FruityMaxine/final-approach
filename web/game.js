@@ -537,6 +537,7 @@ function endGame(reason){
   else if(score>=68){grade='C';gc=getC('--amb');verdict='合格,有提升空间';}
   else if(score>=50){grade='D';gc=getC('--amb');verdict='勉强落地';}
   else{grade='E';gc=getC('--red');verdict='粗糙的着陆';}
+  if(typeof HISTORY!=='undefined')HISTORY.record({score:score|0,grade,fpm:fpm|0,tdz:tdz|0,xoff:+xoff.toFixed(1)});   // 履历记录
   showReport(grade,gc,verdict,
     '综合评分 '+(score|0)+'/100。着陆质量取决于稳定进近——下滑道、中线、速度在最后 30 秒都不能松手。',
     [['触地下降率',(fpm|0)+' fpm',fpm<300?'柔和':(fpm<600?'偏硬':'重着陆')],
@@ -562,6 +563,7 @@ function crashedReport(reason,td){
     if(td.pitch>13)notes.push(['crit','仰角 '+td.pitch.toFixed(1)+'° 擦尾。']);
   }else metrics=[['结果',reason==='overfly'?'飞越':'失败',''],['高度',Math.round(S.alt*M_TO_FT)+' ft','']];
   notes.push(['','建议:从稳定进近练起——保持 3° 下滑道(PAPI 两白两红)、对准中线、速度锁定 Vref,在入口轻柔拉平。']);
+  if(typeof HISTORY!=='undefined')HISTORY.record({score:0,grade:'F',fpm:td?td.vsFpm|0:0,tdz:td?td.zPos|0:0,xoff:td?+Math.abs(td.xOff).toFixed(1):0});   // 履历记录(失败)
   showReport('F',getC('--red'),info[0],info[1],metrics,notes);
 }
 function showReport(grade,gColor,verdict,sub,metrics,notes){
