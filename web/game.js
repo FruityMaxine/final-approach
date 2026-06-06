@@ -93,6 +93,7 @@ function resetState(){
   if(typeof FUEL!=='undefined')FUEL.reset();
   if(typeof HYD!=='undefined')HYD.reset();
   if(typeof ELEC!=='undefined')ELEC.reset();
+  if(typeof FBW!=='undefined')FBW.reset();
 }
 resetState();
 const cfg={ gyro:false, invertPitch:false, sound:true, turb:true, gyroBase:null, tod:'dusk' };
@@ -366,10 +367,16 @@ function updatePhysics(dt){
   S.t+=dt;
   // 液压:操纵增益(液压低→俯仰/横滚迟钝沉重)
   const hg=(typeof HYD!=='undefined')?HYD.ctrlGain():1;
-  S.pitch=clamp(S.pitch+S.pitchIn*9.0*dt*hg,-15,20);
-  S.roll+=S.rollIn*36*dt*hg;
-  if(Math.abs(S.rollIn)<0.02)S.roll-=clamp(S.roll,-1,1)*Math.min(1,dt*1.8)*(Math.abs(S.roll)>0.3?1:0.5);
-  S.roll=clamp(S.roll,-45,45);
+  // 电传飞控 FBW(正常法则:松杆1g航迹/坡度保持+包线保护);关或降级→直接法则
+  const fbwOn=(typeof FBW!=='undefined'&&typeof SYS!=='undefined'&&SYS.get('features','fbw'));
+  if(fbwOn&&FBW.apply(S,S.pitchIn,S.rollIn,dt,hg)){ /* 正常法则已更新 S.pitch/roll */ }
+  else {                                               // 直接法则(FBW 关 / 降级)
+    if(typeof FBW!=='undefined'&&fbwOn)FBW.law='DIRECT';
+    S.pitch=clamp(S.pitch+S.pitchIn*9.0*dt*hg,-15,20);
+    S.roll+=S.rollIn*36*dt*hg;
+    if(Math.abs(S.rollIn)<0.02)S.roll-=clamp(S.roll,-1,1)*Math.min(1,dt*1.8)*(Math.abs(S.roll)>0.3?1:0.5);
+    S.roll=clamp(S.roll,-45,45);
+  }
   // 多发引擎:各发独立 spool/状态机(engines.js);S.N1 取队均(供 UI/EMMA/声音向后兼容)
   if(typeof ENGINES!=='undefined'&&ENGINES.list.length){ ENGINES.step(dt,S.throttle); if(typeof FUEL!=='undefined')FUEL.step(dt); if(typeof HYD!=='undefined')HYD.step(dt); if(typeof ELEC!=='undefined')ELEC.step(dt); S.N1=ENGINES.avgN1(); }
   else { const spool=(S.throttle>S.N1?0.55:0.95); S.N1=clamp(S.N1+(S.throttle-S.N1)*Math.min(1,dt*spool*2.4),0,1); }
@@ -607,7 +614,13 @@ function drawFMA(ctx,h){
   ctx.fillStyle='rgba(6,10,16,.92)';ctx.fillRect(0,0,PW,h);
   ctx.font='700 8px '+MONO;ctx.textBaseline='middle';
   ctx.strokeStyle='#1b2230';ctx.lineWidth=1;ctx.beginPath();ctx.moveTo(0,h);ctx.lineTo(PW,h);ctx.stroke();
-  if(ap.level==='off'){ctx.textAlign='center';ctx.fillStyle='#2ee68f';ctx.fillText('MANUAL FLIGHT',PW/2,h/2);return;}
+  if(ap.level==='off'){
+    const fbwOn=(typeof FBW!=='undefined'&&typeof SYS!=='undefined'&&SYS.get('features','fbw'));
+    const law=fbwOn?(FBW.law==='NORMAL'?'NORMAL LAW':'DIRECT (DEGRADED)'):'DIRECT LAW';
+    ctx.textAlign='left';ctx.fillStyle='#2ee68f';ctx.fillText('MANUAL',4,h/2);
+    ctx.textAlign='right';ctx.fillStyle=(fbwOn&&FBW.law==='NORMAL')?'#2ad8ff':'#ffb02e';ctx.fillText(law,PW-4,h/2);
+    return;
+  }
   const nm={track:'APPR',flare:'FLARE',goaround:'GO-AR',reposition:'REPOS',rollout:'ROLL'}[ap.mode]||ap.mode;
   ctx.textAlign='left';ctx.fillStyle=ap.level==='assist'?'#ffb02e':'#2ad8ff';
   ctx.fillText((ap.level==='assist'?'AST ':'EMMA ')+nm,4,h/2);
