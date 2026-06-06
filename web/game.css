@@ -479,3 +479,11 @@ html[data-device=phone] .fcu-row{gap:6px;}
 .wxr-b.on{color:var(--cyan);border-color:#1d6fb0;background:linear-gradient(180deg,#0c3a52,#08222f);box-shadow:0 0 8px rgba(42,216,255,.25);}
 .wxr-legend{display:flex;flex-wrap:wrap;gap:10px;justify-content:center;margin-top:9px;font-family:var(--mono);font-size:10px;}
 .wxr-k.g{color:var(--grn);} .wxr-k.y{color:var(--amb);} .wxr-k.r{color:var(--red);}
+/* 灯光控制面板(手机零横向溢出:网格 minmax 自适应) */
+.lights-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:7px;margin-bottom:10px;}
+html[data-device=phone] .lights-grid{grid-template-columns:repeat(2,minmax(0,1fr));}
+.light-row{display:flex;align-items:center;justify-content:space-between;gap:8px;background:#080c12;border:1px solid var(--edge);border-radius:9px;padding:8px 11px;cursor:pointer;transition:.1s;}
+.light-row:hover{border-color:var(--edge3);}
+.light-nm{font-family:var(--mono);font-size:11px;letter-spacing:.03em;color:var(--ink);min-width:0;}
+.light-tod{display:flex;align-items:center;gap:10px;margin-top:2px;}
+.light-tod .seg-todl{flex:1;margin:0;}

@@ -166,10 +166,11 @@ function drawWorld(){
   drawTerrain(T);      // 地形网格/田块 — 速度高度参照
   drawScenery(T);      // 跑道两侧建筑/树
   drawAirport(T);      // 航站楼/塔台/机库
-  drawApproachLights(T);
+  if(typeof LIGHTS!=='undefined')LIGHTS.drawGround(T);   // 灯光系统集中门控(进近灯/边灯/RAIL/REIL/滑行道/着陆光锥)
   drawRunway(T);
   drawPAPI();
   if(typeof drawIMC==='function')drawIMC();   // IMC 仪表气象:云中白化/低能见度雾(覆于外景,HUD 之下)
+  if(typeof LIGHTS!=='undefined')LIGHTS.drawAircraftGlow(T);   // 机身灯首视反射(覆于雾上:航行灯/频闪/信标)
   drawHUD();
 }
 
@@ -290,23 +291,7 @@ function drawAirport(T){
   for(let z=120;z<RWY.L;z+=60){quad3d([-hw-30,0.02,z],[-hw-18,0.02,z],[-hw-18,0.02,z+38],[-hw-30,0.02,z+38],'rgba(60,66,76,.7)');}
 }
 
-//------------------ 进近灯(ALSF 式:中线灯排 + 横排 + 顺序闪 rabbit) ------------------
-function drawApproachLights(T){
-  const rabbit=Math.floor((S.t*3)%15),boost=T.lightBoost;
-  for(let i=1;i<=16;i++){
-    const zz=-i*55,p=project(0,0.5,zz);
-    if(p&&p.z<9500){
-      const fade=clamp((1.5-p.z/3400)*boost,0.12,1);
-      const flash=(i>=9&&(16-i)===rabbit)?1.9:1;
-      dot(p,clamp(135/p.z,0.6,4.6)*flash,'rgba(255,250,225,'+fade+')',flash>1?10:(boost>1.3?5:0));
-    }
-    // 每隔几灯一道横排(crossbar)
-    if(i%3===0)for(let xo=-15;xo<=15;xo+=5){if(xo===0)continue;const q=project(xo,0.5,zz);if(q&&q.z<7200)dot(q,clamp(105/q.z,0.45,2.8),'rgba(255,248,215,'+clamp((1.3-q.z/3200)*boost,0.1,0.9)+')',boost>1.3?3:0);}
-  }
-  // 入口绿灯排(threshold)
-  const hw=RWY.W/2;
-  for(let x=-hw;x<=hw;x+=6){const p=project(x,0.4,0);if(p&&p.z<5000)dot(p,clamp(95/p.z,0.5,2.6),'rgba(70,255,140,'+clamp(1.2*boost,0.3,1)+')',boost>1.3?4:0);}
-}
+// (进近灯 ALSF 逻辑已搬迁至 lights.js LIGHTS._approach,由 LIGHTS.drawGround 统一门控)
 
 //------------------ 跑道(+ 距离剩余牌) ------------------
 function drawRunway(T){
@@ -319,8 +304,7 @@ function drawRunway(T){
   for(const s of[-1,1])quad3d([s*6,0.03,RWY.aim-30],[s*9.5,0.03,RWY.aim-30],[s*9.5,0.03,RWY.aim+30],[s*6,0.03,RWY.aim+30],'rgba(245,245,250,.9)');
   for(const s of[-1,1])quad3d([s*6,0.03,RWY.aim-330],[s*9.5,0.03,RWY.aim-330],[s*9.5,0.03,RWY.aim-300],[s*6,0.03,RWY.aim-300],'rgba(245,245,250,.82)');
   for(let z0=0;z0<RWY.L;z0+=seg){const z1=Math.min(z0+seg,RWY.L);for(const sx of[-hw,hw]){const a=project(sx,0.02,z0),b=project(sx,0.02,z1);if(a&&b){wctx.strokeStyle='rgba(242,242,247,.82)';wctx.lineWidth=clamp(180/Math.min(a.z,b.z),1,5);wctx.beginPath();wctx.moveTo(a.x,a.y);wctx.lineTo(b.x,b.y);wctx.stroke();}}}
-  // 边灯(夜间增亮)
-  for(let zz=0;zz<=RWY.L;zz+=120)for(const side of[-hw-1.5,hw+1.5]){const p=project(side,0.5,zz);if(p&&p.z<7000)dot(p,clamp(95/p.z,0.4,2.6),zz>RWY.L-500?'rgba(255,90,60,.92)':'rgba(255,250,225,'+clamp(0.85*boost,0.4,1)+')',boost>1.3?3:0);}
+  // (跑道边灯逻辑已搬迁至 lights.js LIGHTS._edge,由 LIGHTS.drawGround 统一门控)
   // 距离剩余牌(每 600m 一块,跑道右侧;显示剩余千英尺)
   for(let z=600;z<RWY.L;z+=600){
     const remFt=Math.round((RWY.L-z)*M_TO_FT/1000);
