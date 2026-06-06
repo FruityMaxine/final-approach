@@ -35,4 +35,4 @@ betterloop-auditor(opus)审 **4/4 全 PASS**。挂接点全核实无重叠(SD sy
 - [x] Tick2 v0.35 SD系统显示(sd.js 6页只读synoptic:HYD/ELEC/FUEL/BLEED/ENG/STATUS+推力模式CLB/MCT/TOGA;读实时态+页切+HYD失效真反映+手机零横滚实测PASS) — 2026-06-06
 - [x] Tick3 v0.36 PERF性能计算(perf.js V1/VR/V2/Vref/Vapp+TODR/LDR+跑道余量变色,随质量/跑道/风/OAT;应用Vapp写AFS闭环;手机零横滚实测PASS) — 2026-06-06
 - [x] Tick4 v0.37 ECL检查单(checklist.js 6套单正常+非正常/自动感知sense(S)绿勾+手动勾/荐单按phase故障/进度条;自动感知+手动+荐单+手机零横滚实测PASS) — 2026-06-06
-- [ ] Tick5 v0.38 故障情景训练
+- [x] Tick5 v0.38 故障情景训练(scenario.js 4剧本注入FAILURES/WEATHER+处置监测响应时间+评分debrief时间线;注入+处置+评分+手机零横滚实测PASS) — 2026-06-06 ★组18收官

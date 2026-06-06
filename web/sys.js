@@ -71,6 +71,7 @@ SYS.register('panels','lights', {on:true,label:'灯光',         desc:'夜航光
 SYS.register('panels','sd',     {on:true,label:'SD系统',       desc:'系统显示 synoptic:HYD/ELEC/FUEL/BLEED/ENG/STATUS 只读示意 + 推力模式'});
 SYS.register('panels','perf',   {on:true,label:'性能',         desc:'PERF 性能计算:V1/VR/V2/Vref/Vapp + 起降距离余量(按质量/跑道/风)'});
 SYS.register('panels','ecl',    {on:true,label:'检查单',       desc:'电子检查单:进近/着陆/复飞+ENG FIRE/FAIL/HYD LO,自动感知+手动勾'});
+SYS.register('panels','scn',    {on:true,label:'训练情景',     desc:'故障情景训练:起火/失效/液压/风切变剧本注入+处置评分 debrief'});
 
 SYS.load();
 if(typeof window!=='undefined')window.SYS=SYS;

@@ -796,6 +796,7 @@ function loop(now){
     if(typeof TUTORIAL!=='undefined')TUTORIAL.update(S,dt); // 新手教学逐帧检测完成→自动进下一步
     if(typeof REPLAY!=='undefined')REPLAY.sample(S,dt);     // 飞行轨迹节流记录(REC_DT 内部节流)
     if(typeof ATC!=='undefined')ATC.step(S,dt);             // 空管指令序列(按阶段触发,内部去抖)
+    if(typeof SCENARIO!=='undefined')SCENARIO.step(S,dt);   // 故障情景训练:剧本注入+处置监测
     Sound.update(dt); updateMaster();
     syncRuntimeUI();drawWorld();drawPFD();drawFlightDirector();
   }catch(err){console.error(err);}
