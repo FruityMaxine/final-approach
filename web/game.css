@@ -422,3 +422,18 @@ html[data-device=desktop] .sysbtn .kbdhint{display:block;}
 .nd-rng.on{color:var(--cyan);border-color:#1d6fb0;background:linear-gradient(180deg,#0c3a52,#08222f);box-shadow:0 0 8px rgba(42,216,255,.25);}
 .nd-readout{max-width:380px;margin:8px auto 0;font-family:var(--mono);font-size:11px;color:var(--ink-dim);letter-spacing:.02em;text-align:center;}
 .nd-readout b{color:var(--cyan);}
+/* AFS/FCU 自动飞行控制板 */
+.fcu-row{display:flex;gap:8px;align-items:stretch;justify-content:center;margin:6px 0 12px;flex-wrap:wrap;}
+.fcu-ap{font-family:var(--mono);font-size:13px;font-weight:700;color:var(--ink-dim);background:linear-gradient(180deg,#1a2030,#11151e);border:1px solid var(--edge2);border-radius:9px;padding:0 16px;cursor:pointer;transition:.13s;letter-spacing:.05em;}
+.fcu-ap.on{color:var(--grn);border-color:var(--grn2);background:linear-gradient(180deg,#14331f,#0a1c13);box-shadow:0 0 10px rgba(46,230,143,.3);}
+.fcu-tile{display:flex;flex-direction:column;align-items:center;gap:4px;background:#080c12;border:1px solid var(--edge);border-radius:9px;padding:7px 10px;min-width:62px;}
+.fcu-lbl{font-family:var(--mono);font-size:9px;letter-spacing:.14em;color:var(--ink-faint2);}
+.fcu-val{font-family:var(--mono);font-size:19px;font-weight:700;color:var(--cyan);line-height:1;}
+.fcu-knob{display:flex;gap:4px;margin-top:2px;}
+.fcu-b{font-family:var(--mono);font-size:10px;color:var(--ink-dim);background:#11151e;border:1px solid var(--edge2);border-radius:5px;width:24px;height:20px;cursor:pointer;transition:.1s;}
+.fcu-b:hover{color:var(--ink);border-color:var(--edge3);} .fcu-b:active{transform:scale(.9);}
+.fcu-modes{display:flex;gap:6px;align-items:center;margin:6px 0;flex-wrap:wrap;}
+.fcu-grp{font-family:var(--mono);font-size:10px;color:var(--ink-faint2);width:32px;flex:0 0 auto;}
+.fcu-mode{font-family:var(--mono);font-size:11px;color:var(--ink-dim);background:linear-gradient(180deg,#1a2030,#11151e);border:1px solid var(--edge2);border-radius:7px;padding:6px 12px;cursor:pointer;transition:.12s;}
+.fcu-mode:hover{color:var(--ink);border-color:var(--edge3);}
+.fcu-mode.on{color:var(--cyan);border-color:#1d6fb0;background:linear-gradient(180deg,#0c3a52,#08222f);box-shadow:0 0 8px rgba(42,216,255,.25);}

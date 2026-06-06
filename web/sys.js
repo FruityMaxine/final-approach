@@ -64,6 +64,7 @@ SYS.register('panels','mcdu',  {on:true,label:'MCDU 飞控电脑',  desc:'屏幕
 SYS.register('panels','systems',{on:true,label:'系统总控',     desc:'所有功能/故障/环境/面板开关集中一处'});
 SYS.register('panels','replay', {on:true,label:'回放',         desc:'飞行轨迹复盘:下滑剖面+航迹+时间轴 scrub'});
 SYS.register('panels','nd',     {on:true,label:'ND 导航',      desc:'导航显示:航向环+航路点+跑道+ILS航道+风矢量+量程圈'});
+SYS.register('panels','afs',    {on:true,label:'AFS/FCU',      desc:'自动飞行控制板:HDG/ALT/SPD/V·S 选定 + NAV/APPR managed'});
 
 SYS.load();
 if(typeof window!=='undefined')window.SYS=SYS;
