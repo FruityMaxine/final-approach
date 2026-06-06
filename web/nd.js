@@ -94,7 +94,7 @@ const ND={
     for(const w of W2){ const p=proj(-S.x, w.z-S.z);
       if(p.x<-20||p.x>W+20||p.y<-20||p.y>H+20)continue;
       ctx.fillStyle='#2ad8ff'; ctx.beginPath(); ctx.moveTo(p.x,p.y-4); ctx.lineTo(p.x+4,p.y); ctx.lineTo(p.x,p.y+4); ctx.lineTo(p.x-4,p.y); ctx.closePath(); ctx.fill();
-      ctx.fillStyle='#9fb2c8'; ctx.textAlign='left'; ctx.fillText(w.id,p.x+6,p.y+3); ctx.textAlign='center'; }
+      ctx.fillStyle='#9fb2c8'; ctx.textAlign='left'; ctx.fillText(w.id+(w.altLim?' '+w.altLim:''),p.x+6,p.y+3); ctx.textAlign='center'; }
 
     // —— 风矢量(角:风来向相对本机航向) ——
     if(typeof WIND!=='undefined'){
