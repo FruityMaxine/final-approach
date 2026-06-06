@@ -34,7 +34,7 @@ const ENGINES={
         e.n1=Math.max(0,e.n1-dt*0.30); e.n2=Math.max(0.05,e.n2-dt*0.22); e.ff=0; e.egt=Math.max(40,e.egt-dt*45);
         if(e.n1<0.02&&e.n2<0.08)e.state='off';
       } else if(e.state==='off'){
-        if(e.starter){ e.n2=Math.min(0.30,e.n2+dt*0.10); if(e.n2>=0.20&&e.ign)e.state='start'; }
+        if(e.starter){ e.n2=Math.min(0.30,e.n2+dt*0.10); if(e.n2>=0.20&&e.ign){e.state='start';e.fuelStarve=false;} }
         else { e.n1=Math.max(0,e.n1-dt*0.2); e.n2=Math.max(0,e.n2-dt*0.15); e.ff=0; e.egt=Math.max(40,e.egt-dt*30); }
       } else if(e.state==='start'){                                    // 点火起转
         e.n2=Math.min(0.62,e.n2+dt*0.18); e.n1=Math.min(0.25,e.n1+dt*0.12);

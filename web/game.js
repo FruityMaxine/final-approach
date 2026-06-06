@@ -58,7 +58,7 @@ const DeviceMode={
 
 //------------------ 飞机/环境(类 737,已配平标定) ------------------
 const AC={
-  m:62000, S:125, span:34, rho:1.225, g:9.81,
+  m:62000, dryMass:44000, S:125, span:34, rho:1.225, g:9.81,
   maxThrust:180000, revFactor:0.42,
   CLa:0.105, CL0:0.30, aoaStall:14,
   flapCL:[0,0.25,0.50,0.75,1.0], flapStallBonus:[0,1,2,3,4],
@@ -90,6 +90,7 @@ function resetState(){
     calls:{}, lastBand:9999,
   };
   if(typeof ENGINES!=='undefined'&&ENGINES.list.length)ENGINES.reset();
+  if(typeof FUEL!=='undefined')FUEL.reset();
 }
 resetState();
 const cfg={ gyro:false, invertPitch:false, sound:true, turb:true, gyroBase:null, tod:'dusk' };
@@ -366,7 +367,7 @@ function updatePhysics(dt){
   if(Math.abs(S.rollIn)<0.02)S.roll-=clamp(S.roll,-1,1)*Math.min(1,dt*1.8)*(Math.abs(S.roll)>0.3?1:0.5);
   S.roll=clamp(S.roll,-45,45);
   // 多发引擎:各发独立 spool/状态机(engines.js);S.N1 取队均(供 UI/EMMA/声音向后兼容)
-  if(typeof ENGINES!=='undefined'&&ENGINES.list.length){ ENGINES.step(dt,S.throttle); S.N1=ENGINES.avgN1(); }
+  if(typeof ENGINES!=='undefined'&&ENGINES.list.length){ ENGINES.step(dt,S.throttle); if(typeof FUEL!=='undefined')FUEL.step(dt); S.N1=ENGINES.avgN1(); }
   else { const spool=(S.throttle>S.N1?0.55:0.95); S.N1=clamp(S.N1+(S.throttle-S.N1)*Math.min(1,dt*spool*2.4),0,1); }
   if(S.onGround&&S.spoilerArmed&&!S.spoilerOut){S.spoilerOut=true;syncSysUI();}
   const gustMul=(WIND.gustMul!=null?WIND.gustMul:(cfg.turb?1:0));

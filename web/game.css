@@ -301,3 +301,16 @@ html[data-device=desktop] .sysbtn .kbdhint{display:block;}
 .eng-btn.cut.on{color:var(--amb);border-color:#7d6a1f;background:linear-gradient(180deg,#2a2208,#171005);}
 .eng-btn.fire{border-color:#5a2420;color:#d98a82;}
 .eng-btn.fire.on{color:var(--red);border-color:#8a2a22;background:linear-gradient(180deg,#2c1310,#180a09);}
+/* 燃油面板:油箱 + 交输 */
+.fuel-row{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;}
+.tank{display:flex;flex-direction:column;align-items:center;gap:7px;background:linear-gradient(160deg,#141925,#0b0e16);border:1px solid var(--edge);border-radius:11px;padding:12px 10px;}
+.tank-nm{font-family:var(--mono);font-size:11px;font-weight:700;letter-spacing:.08em;color:var(--ink);}
+.tank-bar{width:46px;height:120px;background:#080c12;border:1px solid var(--edge);border-radius:7px;position:relative;overflow:hidden;}
+.tank-fill{position:absolute;left:0;right:0;bottom:0;height:100%;background:linear-gradient(180deg,var(--amb),#c98a14);box-shadow:0 0 12px rgba(255,176,46,.35);transition:height .2s linear;}
+.tank-q{font-family:var(--mono);font-size:12px;font-weight:600;color:var(--amb);}
+.tank-q::after{content:' kg';font-size:8px;color:var(--ink-faint2);}
+.fuel-ctl{display:flex;align-items:center;justify-content:space-between;gap:14px;margin-top:16px;flex-wrap:wrap;}
+.eng-btn.xfeed{flex:0 0 auto;padding:9px 16px;}
+.eng-btn.xfeed.on{color:var(--cyan);border-color:#1d6fb0;background:linear-gradient(180deg,#0c3a52,#08222f);}
+.fuel-total{font-family:var(--mono);font-size:12px;color:var(--ink-dim);}
+.fuel-total b{color:var(--amb);font-size:17px;font-weight:700;margin:0 3px;}
