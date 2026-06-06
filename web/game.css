@@ -470,3 +470,12 @@ html[data-device=phone] .fcu-row{gap:6px;}
 .atc-reply{display:flex;flex-wrap:wrap;gap:7px;margin-top:10px;}
 .atc-btn{flex:1 1 auto;font-family:var(--mono);font-size:11px;letter-spacing:.05em;color:var(--ink-dim);background:linear-gradient(180deg,#1a2030,#11151e);border:1px solid var(--edge2);border-radius:8px;padding:9px 10px;cursor:pointer;transition:.12s;}
 .atc-btn:hover{color:var(--ink);border-color:var(--edge3);} .atc-btn:active{transform:scale(.96);}
+/* 气象雷达 WXR(手机零横向溢出:canvas 100%,按钮 flex-wrap) */
+.wxr-canvas{display:block;width:100%;max-width:380px;margin:4px auto 0;border:1px solid var(--edge);border-radius:8px;background:#04080b;}
+.wxr-ctl{display:flex;flex-wrap:wrap;align-items:center;gap:6px;margin-top:9px;justify-content:center;}
+.wxr-lbl{font-family:var(--mono);font-size:10px;letter-spacing:.06em;color:var(--ink-faint2);}
+.wxr-b{font-family:var(--mono);font-size:11px;color:var(--ink-dim);background:linear-gradient(180deg,#1a2030,#11151e);border:1px solid var(--edge2);border-radius:7px;padding:6px 11px;cursor:pointer;transition:.12s;}
+.wxr-b:hover{color:var(--ink);border-color:var(--edge3);}
+.wxr-b.on{color:var(--cyan);border-color:#1d6fb0;background:linear-gradient(180deg,#0c3a52,#08222f);box-shadow:0 0 8px rgba(42,216,255,.25);}
+.wxr-legend{display:flex;flex-wrap:wrap;gap:10px;justify-content:center;margin-top:9px;font-family:var(--mono);font-size:10px;}
+.wxr-k.g{color:var(--grn);} .wxr-k.y{color:var(--amb);} .wxr-k.r{color:var(--red);}

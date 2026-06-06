@@ -66,6 +66,7 @@ SYS.register('panels','replay', {on:true,label:'回放',         desc:'飞行轨
 SYS.register('panels','nd',     {on:true,label:'ND 导航',      desc:'导航显示:航向环+航路点+跑道+ILS航道+风矢量+量程圈'});
 SYS.register('panels','afs',    {on:true,label:'AFS/FCU',      desc:'自动飞行控制板:HDG/ALT/SPD/V·S 选定 + NAV/APPR managed'});
 SYS.register('panels','atc',    {on:true,label:'无线电',       desc:'ATC 空管语音通信:指令序列 + 消息日志 + 应答'});
+SYS.register('panels','wxr',    {on:true,label:'气象雷达',     desc:'WXR 扇形扫描气象回波:绿/黄/红强度 + 量程 + GAIN/TILT'});
 
 SYS.load();
 if(typeof window!=='undefined')window.SYS=SYS;
