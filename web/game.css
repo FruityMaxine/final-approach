@@ -712,3 +712,19 @@ html[data-device=phone] .syspanel{padding:8px 10px 10px;}
 .pc-cell>span{font-family:var(--mono);font-size:8px;color:var(--ink-faint2);}
 .pc-cell>b{font-family:var(--mono);font-size:14px;font-weight:700;color:var(--grn);}
 .pc-cell>b.wr{color:var(--amb);}
+
+/* 数据链 DCDU(ATIS/CPDLC,手机零横滚) */
+.dl-sec{font-family:var(--mono);font-size:10px;font-weight:700;letter-spacing:.06em;color:var(--cyan);margin:6px 0 5px;border-bottom:1px solid var(--edge);padding-bottom:3px;display:flex;justify-content:space-between;align-items:center;}
+.dl-spk{font-family:var(--mono);font-size:9px;color:var(--cyan);background:#08222f;border:1px solid #1d6fb0;border-radius:5px;padding:2px 9px;cursor:pointer;}
+.dl-atis{background:#070a10;border:1px solid var(--edge);border-radius:7px;padding:8px 10px;}
+.dl-atisL{font-family:var(--mono);font-size:11px;font-weight:700;color:var(--grn);margin-bottom:3px;}
+.dl-atisT{font-family:var(--mono);font-size:10px;color:var(--ink-dim);line-height:1.5;word-break:break-word;}
+.dl-cpdlc{display:flex;flex-direction:column;gap:4px;max-height:30vh;overflow-y:auto;overflow-x:hidden;background:#070a10;border:1px solid var(--edge);border-radius:7px;padding:7px 9px;}
+.dl-msg{display:flex;flex-wrap:wrap;align-items:baseline;gap:4px 6px;font-family:var(--mono);font-size:10px;line-height:1.35;}
+.dl-t{font-size:8px;color:var(--ink-faint2);flex:0 0 auto;} .dl-d{font-size:8px;font-weight:700;flex:0 0 auto;}
+.dl-msg.up .dl-d{color:var(--cyan);} .dl-msg.dn .dl-d{color:var(--grn);}
+.dl-m{flex:1 1 100%;color:var(--ink);word-break:break-word;} .dl-msg.dn .dl-m{color:var(--grn);}
+.dl-empty{font-family:var(--mono);font-size:10px;color:var(--ink-faint2);text-align:center;padding:14px 4px;}
+.dl-reply{display:flex;flex-wrap:wrap;gap:7px;margin-top:9px;}
+.dl-rb{flex:1 1 auto;font-family:var(--mono);font-size:11px;color:var(--ink-dim);background:linear-gradient(180deg,#1a2030,#11151e);border:1px solid var(--edge2);border-radius:8px;padding:9px 8px;cursor:pointer;transition:.12s;}
+.dl-rb:hover{color:var(--ink);border-color:var(--edge3);}

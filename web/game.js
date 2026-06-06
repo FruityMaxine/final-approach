@@ -585,6 +585,7 @@ function doReset(){
   resetState();S.started=true;
   if(typeof REPLAY!=='undefined')REPLAY.start();   // 重新进近:重开轨迹录制
   if(typeof ATC!=='undefined')ATC.reset();         // 重新进近:重置空管
+  if(typeof DATALINK!=='undefined')DATALINK.reset();  // 重新进近:重置数据链
   syncThrottleUI();syncFlapUI();syncSysUI();updateStickKnob();updateRudderUI();updateEmmaBtn();
   calloutEl.classList.remove('show');
   if(typeof revealTags==='function')revealTags(4500);
@@ -801,6 +802,7 @@ function loop(now){
     if(typeof REPLAY!=='undefined')REPLAY.sample(S,dt);     // 飞行轨迹节流记录(REC_DT 内部节流)
     if(typeof ATC!=='undefined')ATC.step(S,dt);             // 空管指令序列(按阶段触发,内部去抖)
     if(typeof SCENARIO!=='undefined')SCENARIO.step(S,dt);   // 故障情景训练:剧本注入+处置监测
+    if(typeof DATALINK!=='undefined')DATALINK.step(S,dt);   // CPDLC 数据链报文(按阶段触发)
     Sound.update(dt); updateMaster();
     syncRuntimeUI();drawWorld();drawPFD();drawFlightDirector();
   }catch(err){console.error(err);}
@@ -829,6 +831,7 @@ function startFlight(){
   if(typeof TUTORIAL!=='undefined'&&typeof SYS!=='undefined'&&SYS.get('features','tutorial'))TUTORIAL.start();
   if(typeof REPLAY!=='undefined')REPLAY.start();   // 开录飞行轨迹
   if(typeof ATC!=='undefined')ATC.reset();         // 重置空管通信
+  if(typeof DATALINK!=='undefined')DATALINK.reset();  // 重置数据链
 }
 $('startBtn').addEventListener('click',startFlight);
 $('helpHint').addEventListener('click',()=>helpEl.classList.add('show'));

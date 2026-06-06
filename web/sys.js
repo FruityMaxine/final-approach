@@ -78,6 +78,7 @@ SYS.register('panels','wb',     {on:true,label:'载重',         desc:'载重平
 SYS.register('panels','proc',   {on:true,label:'程序',         desc:'SID/STAR 程序进近:多机场进场程序库,程序点并入 F-PLN + ND 显示'});
 SYS.register('panels','chart',  {on:true,label:'航图',         desc:'进近图/航图:平面进近图 + 垂直剖面(静态参考,区别于 ND)'});
 SYS.register('panels','precip', {on:true,label:'降水',         desc:'降水天气+污染跑道:雨/雪渲染+干/湿/雪 μ 摩擦(降刹车效能)'});
+SYS.register('panels','dl',     {on:true,label:'数据链',       desc:'ATIS 自动情报通播 + CPDLC 文本数据链报文(区别于 ATC 语音)'});
 
 SYS.load();
 if(typeof window!=='undefined')window.SYS=SYS;
