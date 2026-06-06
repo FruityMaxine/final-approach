@@ -21,7 +21,11 @@ const MCDU={
   _fuel(){ return (typeof FUEL!=='undefined')?Math.round(FUEL.total()):0; },
   _tank(id){ return (typeof FUEL!=='undefined'&&FUEL.tanks[id])?Math.round(FUEL.tanks[id].qty):0; },
   _distRW(){ return (typeof S!=='undefined')?Math.max(0,(-S.z)/1852).toFixed(1):'--'; },
-  _hdg(){ return (typeof S!=='undefined')?Math.round((270+S.hdg+360)%360):270; },
+  _rhdg(){ return (typeof RWY!=='undefined'&&RWY.hdg!=null)?RWY.hdg:270; },        // 当前跑道朝向
+  _ils(){ return (typeof RWY!=='undefined'&&RWY.ils)?RWY.ils:'110.30'; },
+  _rwy(){ return (typeof RWY!=='undefined'&&RWY.name)?RWY.name:'27'; },
+  _icao(){ return (typeof RWY!=='undefined'&&RWY.icao)?RWY.icao:'ZVGA'; },
+  _hdg(){ return (typeof S!=='undefined')?Math.round((this._rhdg()+S.hdg+360)%360):this._rhdg(); },
 
   // —— LSK 行写入 ——
   ent(lsk){ const e=this.entries[this.page]; return e?e[lsk]:undefined; },
@@ -147,11 +151,11 @@ MCDU.pages={
     {ll:'TO RW27', lv:this._distRW()+'NM', lc:'blu'},
     {ll:'BRG/DIST', lv:'270°/'+this._distRW()},
     {ll:'REQUIRED', lv:'HIGH', rl:'ESTIMATED', rv:'0.05NM'} ]}; },
-  RADNAV(){ return {title:'RAD NAV', rows:[
+  RADNAV(){ const h=String(this._rhdg()); return {title:'RAD NAV', rows:[
     {ll:'VOR1/FREQ', lv:'SHA/113.90', rl:'FREQ/VOR2', rv:'112.10/PD'},
-    {ll:'CRS', lv:'270', rl:'CRS', rv:'---'},
-    {ll:'ILS/FREQ', lv:'IRW27/110.30'},
-    {ll:'CRS', lv:'270', rl:'SLOPE', rv:'-3.0°'},
+    {ll:'CRS', lv:h, rl:'CRS', rv:'---'},
+    {ll:'ILS/FREQ', lv:'I'+this._rwy()+'/'+this._ils()},
+    {ll:'CRS', lv:h, rl:'SLOPE', rv:'-3.0°'},
     {ll:'ADF1/FREQ', lv:'---/----', rl:'FREQ/ADF2', rv:'----/---'},
     {} ]}; },
   FUEL(){ return {title:'FUEL PRED', rows:[
@@ -176,12 +180,12 @@ MCDU.pages={
     {lv:'<COPY ACTIVE'}, {lv:'<SEC F-PLN'}, {lv:'<INIT'}, {lv:'<PERF'}, {}, {rv:'RETURN>'} ]}; },
   ATC(){ return {title:'ATC MENU', rows:[
     {lv:'<LAT REQ'}, {lv:'<VERT REQ'}, {lv:'<WHEN CAN WE'}, {lv:'<OTHER REQ'}, {}, {lv:'<MSG LOG', rv:'CONNECT>'} ]}; },
-  AIRPORT(){ return {title:'AIRPORT', rows:[
-    {ll:'DEST', lv:'ZSPD RW27', rl:'DIST', rv:this._distRW()+'NM'},
-    {ll:'ELEV', lv:'13FT', rl:'LEN', rv:'3400M'},
-    {ll:'ILS', lv:'110.30', rl:'CRS', rv:'270°'},
-    {ll:'PAPI', lv:'3.0°'},
-    {},
+  AIRPORT(){ const R=(typeof RWY!=='undefined')?RWY:{}; return {title:'AIRPORT', rows:[
+    {ll:'DEST', lv:this._icao()+' RW'+this._rwy(), rl:'DIST', rv:this._distRW()+'NM'},
+    {ll:'ELEV', lv:((R.elevFt|0)||0)+'FT', rl:'LEN', rv:((R.L|0)||0)+'M'},
+    {ll:'ILS', lv:this._ils(), rl:'CRS', rv:this._rhdg()+'°'},
+    {ll:'PAPI', lv:(R.papi||3.0)+'°'},
+    {ll:'APT', lv:R.aptName||'维加国际'},
     {ll:'ALTN', lv:'ZSSS'} ]}; },
 };
 

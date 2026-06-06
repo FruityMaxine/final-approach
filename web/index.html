@@ -34,7 +34,7 @@
     </svg>
     <div class="topbar">
       <div class="tags" id="infoTags">
-        <div class="badge">APPR · RWY <b>27</b> · ILS 110.30</div>
+        <div class="badge" id="apprBadge">APPR · RWY <b>27</b> · ILS 110.30</div>
         <div class="badge" id="phaseBadge">阶段 <b id="phasetxt">进近</b></div>
         <div class="badge warn" id="windBadge">风 <b>280/08</b> 阵风</div>
       </div>
@@ -164,6 +164,14 @@
       <div class="seg-opt" data-start="cruise">高位切入<span class="sub">7.8 NM</span></div>
     </div>
   </div>
+  <div class="cfg-grp"><span class="lbl">目的地机场 &nbsp;<span id="cfgApVal" style="color:var(--cyan);">维加国际 ZVGA · RWY 27</span></span>
+    <div class="seg seg-ap">
+      <div class="seg-opt on" data-ap="vega">维加<span class="sub">ZVGA · 27 · 120ft</span></div>
+      <div class="seg-opt" data-ap="alps">山城<span class="sub">LSGA · 34 · 3120ft</span></div>
+      <div class="seg-opt" data-ap="coast">海岸<span class="sub">KSEA · 16 · 430ft</span></div>
+      <div class="seg-opt" data-ap="island">岛屿<span class="sub">RJTI · 05 · 28ft</span></div>
+    </div>
+  </div>
   <div class="cfg-grp"><span class="lbl">机型 &nbsp;<span id="cfgAcVal" style="color:var(--cyan);">窄体客机 · Vref 140</span></span>
     <div class="seg seg-ac">
       <div class="seg-opt on" data-ac="narrow">窄体<span class="sub">A320 · 140kt</span></div>
@@ -266,6 +274,7 @@
 <script src="sys.js"></script>
 <script src="config.js"></script>
 <script src="aircraft.js"></script>
+<script src="airports.js"></script>
 <script src="engines.js"></script>
 <script src="panels.js"></script>
 <script src="fuel.js"></script>

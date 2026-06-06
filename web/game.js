@@ -66,7 +66,8 @@ const AC={
   CD0:0.021, k:0.045, gearCD:0.018, spoilerCD:0.065, spoilerLiftLoss:0.55,
   gearHeight:3.6,
 };
-const RWY={ W:45, L:3000, aim:300, tdzStart:150, tdzEnd:900, elevFt:120 };
+const RWY={ W:45, L:3000, aim:300, tdzStart:150, tdzEnd:900, elevFt:120,
+            name:'27', ils:'110.30', hdg:270, papi:3.0, icao:'ZVGA', aptName:'维加国际' };   // 机场库默认(applyAirport 覆写)
 const GS_DEG=3.0;
 const PAPI={ x:-RWY.W/2-22, y:0, z:340 };
 // m/s 顶风+侧风;gustMul 湍流强度倍率,shear 风切变(均由 config.js applyWind 写)
@@ -703,7 +704,7 @@ function drawAltTape(ctx,x,y,w,h){
 }
 function drawHeadingTape(ctx,x,y,w,h){
   ctx.save();ctx.beginPath();ctx.rect(x,y,w,h);ctx.clip();ctx.fillStyle='rgba(9,13,19,.92)';ctx.fillRect(x,y,w,h);
-  const baseH=270+S.hdg,cxx=x+w/2,ppd=w/60;ctx.font='10px '+MONO;ctx.textBaseline='middle';ctx.textAlign='center';
+  const baseH=(typeof RWY!=='undefined'&&RWY.hdg!=null?RWY.hdg:270)+S.hdg,cxx=x+w/2,ppd=w/60;ctx.font='10px '+MONO;ctx.textBaseline='middle';ctx.textAlign='center';
   for(let d=-40;d<=40;d+=5){let hd=(baseH+d+360)%360,xx=cxx+d*ppd;if(xx<x||xx>x+w)continue;if(d%10===0){ctx.strokeStyle='#3a4458';ctx.lineWidth=1;ctx.beginPath();ctx.moveTo(xx,y);ctx.lineTo(xx,y+6);ctx.stroke();ctx.fillStyle='#cdd6e6';ctx.fillText(('0'+Math.round(hd/10)).slice(-2),xx,y+16);}else{ctx.strokeStyle='#2a3142';ctx.beginPath();ctx.moveTo(xx,y);ctx.lineTo(xx,y+3);ctx.stroke();}}
   ctx.restore();ctx.fillStyle='#ffe000';ctx.beginPath();ctx.moveTo(x+w/2,y);ctx.lineTo(x+w/2-5,y-7);ctx.lineTo(x+w/2+5,y-7);ctx.closePath();ctx.fill();ctx.strokeStyle='#2a3142';ctx.strokeRect(x,y,w,h);
 }
@@ -863,13 +864,19 @@ function updateWindUI(){
 function updateAcUI(){
   const v=$('cfgAcVal'); if(v&&typeof AIRCRAFT!=='undefined'){ const a=AIRCRAFT[CONFIG.aircraft]||AIRCRAFT.narrow; v.textContent=a.name+' · Vref '+a.vref; }
 }
+function updateAirportUI(){
+  if(typeof RWY==='undefined')return;
+  const v=$('cfgApVal'); if(v)v.textContent=(RWY.aptName||'维加国际')+' '+(RWY.icao||'ZVGA')+' · RWY '+(RWY.name||'27');
+  const b=$('apprBadge'); if(b)b.innerHTML='APPR · RWY <b>'+(RWY.name||'27')+'</b> · ILS '+(RWY.ils||'110.30');
+}
 function syncConfigUI(){
   document.querySelectorAll('.seg-opt[data-diff]').forEach(s=>s.classList.toggle('on',s.dataset.diff===CONFIG.diff));
   document.querySelectorAll('.seg-opt[data-start]').forEach(s=>s.classList.toggle('on',s.dataset.start===CONFIG.start));
+  document.querySelectorAll('.seg-opt[data-ap]').forEach(s=>s.classList.toggle('on',s.dataset.ap===CONFIG.airport));
   document.querySelectorAll('.seg-opt[data-ac]').forEach(s=>s.classList.toggle('on',s.dataset.ac===CONFIG.aircraft));
   document.querySelectorAll('.seg-opt[data-eng]').forEach(s=>s.classList.toggle('on',+s.dataset.eng===CONFIG.engines));
   document.querySelectorAll('.seg-opt[data-wx]').forEach(s=>s.classList.toggle('on',s.dataset.wx===CONFIG.weather));
-  updateAcUI();
+  updateAcUI(); updateAirportUI();
   const ws=$('cfgWindSpeed');if(ws)ws.value=CONFIG.windSpeed;
   const wd=$('cfgWindDir');if(wd)wd.value=CONFIG.windDir;
   $('swFree').classList.toggle('on',CONFIG.freeFlight);
@@ -877,6 +884,12 @@ function syncConfigUI(){
 }
 document.querySelectorAll('.seg-opt[data-diff]').forEach(s=>s.addEventListener('click',()=>{applyDifficulty(s.dataset.diff);syncConfigUI();}));
 document.querySelectorAll('.seg-opt[data-start]').forEach(s=>s.addEventListener('click',()=>{CONFIG.start=s.dataset.start;saveConfig();syncConfigUI();}));
+document.querySelectorAll('.seg-opt[data-ap]').forEach(s=>s.addEventListener('click',()=>{
+  CONFIG.airport=s.dataset.ap;
+  if(typeof applyAirport==='function')applyAirport(CONFIG.airport);   // 逐字段写 RWY + WPTS + PAPI
+  resetState();                                                       // 按新机场重置(标高/航路)
+  saveConfig(); syncConfigUI(); updateAirportUI();
+}));
 document.querySelectorAll('.seg-opt[data-ac]').forEach(s=>s.addEventListener('click',()=>{
   CONFIG.aircraft=s.dataset.ac;
   if(typeof applyAircraft==='function')applyAircraft(CONFIG.aircraft);   // 逐字段写 AC + 发动机数 + 燃油容量
