@@ -23,8 +23,11 @@ function resizeWorld(){
 function resizeWorldIfNeeded(){const r=world.parentElement.getBoundingClientRect();if(Math.abs(r.width-W)>1||Math.abs(r.height-Hh)>1)resizeWorld();}
 const NEAR=1;   // 近平面(相机前 1m);多边形跨此面时裁剪而非整体丢弃
 // 世界坐标 → 相机空间{r右,u上,z前}。投影分两步,便于近平面裁剪。
+// 空间迷向:外景相机吃错觉偏置(PFD 不吃,见 game.js drawAttitude 用真实 S)
+function illRoll(){ return (typeof SPATIAL!=='undefined')?SPATIAL.leanRoll:0; }
+function illPitch(){ return (typeof SPATIAL!=='undefined')?SPATIAL.somatoPitch:0; }
 function toCamera(px,py,pz){
-  const yaw=S.hdg*RAD,pit=S.pitch*RAD,rol=S.roll*RAD;
+  const yaw=S.hdg*RAD,pit=(S.pitch+illPitch())*RAD,rol=(S.roll+illRoll())*RAD;
   const cp=Math.cos(pit),sp=Math.sin(pit),cyaw=Math.cos(yaw),syaw=Math.sin(yaw);
   const fx=cp*syaw,fy=sp,fz=cp*cyaw;
   let rx=fz,rz=-fx;const rl=Math.hypot(rx,rz)||1;rx/=rl;rz/=rl;
@@ -144,7 +147,7 @@ function drawWorld(){
   resizeWorldIfNeeded();
   const T=tod();
   wctx.clearRect(0,0,W,Hh);
-  const pit=S.pitch*RAD,rol=S.roll*RAD,hy=focal*Math.tan(pit);
+  const pit=(S.pitch+illPitch())*RAD,rol=(S.roll+illRoll())*RAD,hy=focal*Math.tan(pit);   // 外景吃空间迷向错觉
   const BIG=Math.hypot(W,Hh)*1.5;
   wctx.save();wctx.translate(cx,cy);wctx.rotate(rol);
   const sky=wctx.createLinearGradient(0,-BIG,0,hy);

@@ -94,6 +94,7 @@ function resetState(){
   if(typeof HYD!=='undefined')HYD.reset();
   if(typeof ELEC!=='undefined')ELEC.reset();
   if(typeof FBW!=='undefined')FBW.reset();
+  if(typeof SPATIAL!=='undefined')SPATIAL.reset();
 }
 resetState();
 const cfg={ gyro:false, invertPitch:false, sound:true, turb:true, gyroBase:null, tod:'dusk' };
@@ -783,6 +784,7 @@ function loop(now){
     while(acc>=STEP&&n<8){if(ap.level!=='off')autopilot(STEP);updatePhysics(STEP);acc-=STEP;n++;}
     if(acc>STEP)acc=0;
     if(typeof FAILURES!=='undefined'){ FAILURES.step(dt); if(S.started&&S.phase!=='ended')FAILURES.randomInject(dt); }   // 推进故障连锁 + MTBF 随机注入
+    if(typeof SPATIAL!=='undefined')SPATIAL.update(dt,S);   // 空间迷向错觉(只偏外景,PFD 真实)
     Sound.update(dt); updateMaster();
     syncRuntimeUI();drawWorld();drawPFD();drawFlightDirector();
   }catch(err){console.error(err);}
