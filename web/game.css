@@ -361,3 +361,33 @@ html[data-device=desktop] .sysbtn .kbdhint{display:block;}
 .sysctl-txt{display:flex;flex-direction:column;min-width:0;}
 .sysctl-txt b{font-size:12px;color:var(--ink);font-weight:600;}
 .sysctl-txt span{font-size:10px;color:var(--ink-faint2);margin-top:1px;}
+/* MCDU 飞控电脑(A320 风格 CDU) */
+.mcdu{padding:12px 10px 56px;display:flex;flex-direction:column;align-items:center;gap:10px;max-width:540px;margin:0 auto;}
+.mcdu-unit{display:flex;align-items:stretch;gap:6px;width:100%;}
+.lsk-col{display:flex;flex-direction:column;justify-content:space-around;padding:22px 0;flex:0 0 auto;}
+.lsk{width:28px;height:15px;border-radius:3px;background:linear-gradient(180deg,#2a3242,#141a26);border:1px solid var(--edge2);cursor:pointer;display:grid;place-items:center;transition:.1s;}
+.lsk::after{content:"";width:15px;height:3px;border-radius:2px;background:#5a6478;transition:.1s;}
+.lsk:hover{border-color:var(--edge3);} .lsk:active{transform:scale(.9);}
+.lsk.has::after{background:var(--cyan);box-shadow:0 0 6px var(--cyan);}
+.cdu-screen{flex:1;min-width:0;background:#02100a;border:2px solid #11202a;border-radius:8px;padding:8px 10px;font-family:var(--mono);box-shadow:inset 0 0 28px rgba(0,0,0,.7),inset 0 0 9px rgba(46,230,143,.06);}
+.cdu-title{text-align:center;color:var(--grn);font-size:12px;letter-spacing:.12em;margin-bottom:4px;text-shadow:0 0 8px rgba(46,230,143,.5);}
+.cdu-line{display:flex;justify-content:space-between;gap:8px;line-height:1.12;}
+.cdu-lbl{flex:1;min-width:0;font-size:8.5px;color:#7f92a8;letter-spacing:.03em;white-space:nowrap;overflow:hidden;}
+.cdu-val{flex:1;min-width:0;font-size:11px;color:var(--grn);letter-spacing:.02em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.cdu-lbl.r,.cdu-val.r{text-align:right;}
+.cdu-val.ent{color:var(--cyan);text-shadow:0 0 6px rgba(42,216,255,.4);}
+.cdu-val.amb{color:var(--amb);} .cdu-val.blu{color:var(--blu);}
+.cdu-scratch{margin-top:6px;border-top:1px solid #11202a;padding-top:5px;font-size:11px;color:var(--ink);min-height:16px;letter-spacing:.04em;font-family:var(--mono);}
+.cdu-scratch.msg{color:var(--amb);}
+.cdu-scratch .cur{color:var(--grn);}
+.mcdu-keys{width:100%;display:flex;flex-direction:column;gap:8px;}
+.fn-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:5px;}
+.fnk{font-family:var(--mono);font-size:9px;letter-spacing:.02em;color:var(--ink-dim);background:linear-gradient(180deg,#1a2030,#11151e);border:1px solid var(--edge);border-radius:6px;padding:8px 2px;text-align:center;cursor:pointer;transition:.1s;}
+.fnk:hover{color:var(--ink);border-color:var(--edge3);}
+.fnk.on{color:var(--cyan);border-color:#1d6fb0;background:linear-gradient(180deg,#0c3a52,#08222f);box-shadow:0 0 8px rgba(42,216,255,.25);}
+.kbd-wrap{display:flex;gap:8px;align-items:flex-start;}
+.alpha-grid{flex:1;display:grid;grid-template-columns:repeat(7,1fr);gap:4px;}
+.num-grid{flex:0 0 auto;display:grid;grid-template-columns:repeat(3,1fr);gap:4px;}
+.mk{font-family:var(--mono);font-size:12px;font-weight:600;color:var(--ink);background:linear-gradient(180deg,#222a3b,#11151e);border:1px solid var(--edge2);border-radius:6px;min-width:26px;padding:9px 0;text-align:center;cursor:pointer;transition:.08s;user-select:none;}
+.mk:hover{border-color:var(--edge3);} .mk:active{transform:scale(.88);background:#2a3450;}
+.mk.fnsp{font-size:8.5px;color:var(--ink-dim);} .mk.clr{font-size:9px;color:var(--amb);} .mk.num{color:var(--grn);}
