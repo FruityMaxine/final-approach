@@ -266,6 +266,8 @@ function drawScenery(T){
 
 //------------------ 机场:航站楼 + 塔台 + 机库(跑道左侧) ------------------
 function drawAirport(T){
+  // 多跑道布局(副跑道/滑行道/停机坪)— airport.js;主跑道27由 drawRunway 画
+  if(typeof AIRPORT!=='undefined')AIRPORT.draw(T);
   // 航站楼(长低建筑,跑道左侧平行)
   worldBox(-150,-95,180,560,16,T.bldLit,T.bldLit,T.bld,(T.lightBoost>0.7?T.win:null));
   // 廊桥/小附属
