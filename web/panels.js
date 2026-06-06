@@ -55,27 +55,33 @@ PANELS.register('engine',{
     for(const e of ENGINES.list){
       const i=e.id-1;
       h+='<div class="eng-col" data-eng="'+i+'">'
-        +'<div class="eng-hd">ENG '+e.id+'</div>'
-        +'<div class="eng-state" id="estate'+e.id+'">--</div>'
-        +'<div class="eng-gauges">'
-          +'<div>N1<b id="eN1'+e.id+'">0</b></div><div>N2<b id="eN2'+e.id+'">0</b></div>'
-          +'<div>EGT<b id="eEGT'+e.id+'">0</b></div><div>FF<b id="eFF'+e.id+'">0</b></div>'
+        +'<div class="eng-top"><span class="eng-hd">ENG '+e.id+'</span><span class="eng-state" id="estate'+e.id+'">--</span></div>'
+        +'<div class="eng-n1"><div class="eng-n1bar"><i class="eng-n1fill" id="eN1f'+e.id+'"></i></div>'
+          +'<div class="eng-n1v"><b id="eN1'+e.id+'">0</b><span>N1%</span></div></div>'
+        +'<div class="eng-rd">'
+          +'<div class="erd"><span>N2</span><b id="eN2'+e.id+'">0</b></div>'
+          +'<div class="erd"><span>EGT</span><b id="eEGT'+e.id+'">0</b></div>'
+          +'<div class="erd"><span>FF</span><b id="eFF'+e.id+'">0</b></div>'
+          +'<div class="erd"><span>OIL P</span><b id="eOP'+e.id+'">0</b></div>'
+          +'<div class="erd"><span>OIL T</span><b id="eOT'+e.id+'">0</b></div>'
+          +'<div class="erd"><span>VIB</span><b id="eVB'+e.id+'">0</b></div>'
         +'</div>'
-        +'<button class="eng-btn" data-act="starter">起动机</button>'
-        +'<button class="eng-btn" data-act="ign">点火 IGN</button>'
-        +'<button class="eng-btn cut" data-act="cutoff">断油 CUTOFF</button>'
-        +'<button class="eng-btn fire" data-act="fire">灭火手柄</button>'
-        +'<button class="eng-btn" data-act="pump">燃油泵</button>'
-        +'</div>';
+        +'<div class="eng-ctl">'
+          +'<button class="echip" data-act="starter" title="起动机 STARTER">STR</button>'
+          +'<button class="echip" data-act="ign" title="点火 IGNITION">IGN</button>'
+          +'<button class="echip cut" data-act="cutoff" title="断油 CUTOFF">CUT</button>'
+          +'<button class="echip fire" data-act="fire" title="灭火手柄 FIRE">FIRE</button>'
+          +'<button class="echip" data-act="pump" title="燃油泵 PUMP">PMP</button>'
+        +'</div></div>';
     }
-    h+='</div><div class="sp-hint">启动序列:CUTOFF 关 → STARTER → IGN,N2 起转点火至慢车。FIRE 拉手柄断油灭火。</div></div>';
+    h+='</div><div class="sp-hint">N1 为主推力。启动:CUT 关→STR→IGN,N2 起转点火至慢车;FIRE 拉手柄断油灭火。EGT 超 850 转红。</div></div>';
     return h;
   },
   wire(host){
     if(typeof ENGINES==='undefined')return;
     host.querySelectorAll('.eng-col').forEach(col=>{
       const i=+col.dataset.eng;
-      col.querySelectorAll('.eng-btn').forEach(btn=>btn.addEventListener('click',()=>{
+      col.querySelectorAll('.echip').forEach(btn=>btn.addEventListener('click',()=>{
         const e=ENGINES.list[i]; if(!e)return;
         switch(btn.dataset.act){
           case 'cutoff': e.fuelCut=!e.fuelCut; if(e.fuelCut){e.starter=false;e.ign=false;} break;
@@ -93,10 +99,14 @@ PANELS.register('engine',{
     const g=id=>document.getElementById(id);
     for(const e of ENGINES.list){
       const st=g('estate'+e.id); if(st){st.textContent=e.state.toUpperCase();st.className='eng-state s-'+e.state;}
+      const f=g('eN1f'+e.id); if(f)f.style.width=Math.max(0,Math.min(100,e.n1*100))+'%';
       if(g('eN1'+e.id))g('eN1'+e.id).textContent=Math.round(e.n1*100);
       if(g('eN2'+e.id))g('eN2'+e.id).textContent=Math.round(e.n2*100);
       if(g('eEGT'+e.id)){g('eEGT'+e.id).textContent=Math.round(e.egt);g('eEGT'+e.id).classList.toggle('hot',e.egt>850);}
       if(g('eFF'+e.id))g('eFF'+e.id).textContent=e.ff.toFixed(1);
+      if(g('eOP'+e.id))g('eOP'+e.id).textContent=Math.round(e.n2*78+8);      // 滑油压(派生 n2)
+      if(g('eOT'+e.id))g('eOT'+e.id).textContent=Math.round(60+e.egt*0.11);  // 滑油温(派生 egt)
+      if(g('eVB'+e.id))g('eVB'+e.id).textContent=(e.fire?4.8:e.n1*0.7).toFixed(1);  // 振动
       const col=host.querySelector('.eng-col[data-eng="'+(e.id-1)+'"]'); if(!col)continue;
       const set=(act,on)=>{const b=col.querySelector('[data-act='+act+']');if(b)b.classList.toggle('on',on);};
       set('cutoff',e.fuelCut); set('starter',e.starter); set('ign',e.ign); set('fire',e.fire); set('pump',e.pump!==false);

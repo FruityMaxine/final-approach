@@ -269,9 +269,10 @@ html[data-device=desktop] .sysbtn .kbdhint{display:block;}
 @media (pointer:coarse){ .kbdhint{display:none !important;} }
 
 /* 面板打开时仪表区增高,给面板更多空间(飞行视野压到约 36-40vh 但始终可见、绝不被盖) */
-html[data-device=phone] #console.panel-open{ height:clamp(460px,64vh,640px); }
-html[data-device=tablet] #console.panel-open{ height:clamp(520px,62vh,760px); }
-html[data-device=desktop] #console.panel-open{ height:clamp(360px,50vh,520px); }
+/* 面板内容已致密化,降低仪表区占比→飞行视野更大、面板不再占满屏(用户反馈) */
+html[data-device=phone] #console.panel-open{ height:clamp(380px,54vh,560px); }
+html[data-device=tablet] #console.panel-open{ height:clamp(440px,52vh,680px); }
+html[data-device=desktop] #console.panel-open{ height:clamp(320px,44vh,480px); }
 
 /*==================================================================
   面板框架(PanelFramework) — 选择器 tab 条 + 面板覆盖层
@@ -303,22 +304,37 @@ html[data-device=phone] #panelHost{font-size:.92em;}
 /* 手机:4 发横排会溢出 → 2×2 排布 */
 html[data-device=phone] .eng-grid.eng-4{grid-template-columns:repeat(2,minmax(0,1fr));}
 html[data-device=phone] .eng-col{padding:9px 6px;gap:5px;}
-.eng-col{background:linear-gradient(160deg,#141925,#0b0e16);border:1px solid var(--edge);border-radius:11px;padding:11px 9px;display:flex;flex-direction:column;gap:7px;}
-.eng-hd{font-family:var(--mono);font-size:12px;font-weight:700;letter-spacing:.1em;color:var(--ink);text-align:center;}
-.eng-state{font-family:var(--mono);font-size:11px;font-weight:700;text-align:center;padding:4px;border-radius:6px;background:#0b0f17;color:var(--ink-dim);}
-.eng-state.s-run{color:var(--grn);} .eng-state.s-idle{color:var(--grn);}
+/* 引擎面板:高密度 EICAS — N1 主条 + 6 项二级读数 + 紧凑控制 chip */
+.eng-col{background:linear-gradient(160deg,#141925,#0b0e16);border:1px solid var(--edge);border-radius:9px;padding:7px 8px;display:flex;flex-direction:column;gap:5px;}
+html[data-device=phone] .eng-col{padding:6px 6px;gap:4px;}
+.eng-top{display:flex;align-items:center;justify-content:space-between;gap:6px;}
+.eng-hd{font-family:var(--mono);font-size:11px;font-weight:700;letter-spacing:.08em;color:var(--ink);}
+.eng-state{font-family:var(--mono);font-size:9px;font-weight:700;padding:2px 6px;border-radius:5px;background:#0b0f17;color:var(--ink-dim);}
+.eng-state.s-run,.eng-state.s-idle{color:var(--grn);}
 .eng-state.s-start{color:var(--amb);} .eng-state.s-off{color:var(--ink-faint2);}
 .eng-state.s-fail,.eng-state.s-fire{color:var(--red);background:#2a0f0c;}
-.eng-gauges{display:grid;grid-template-columns:1fr 1fr;gap:4px;font-family:var(--mono);font-size:9px;color:var(--ink-faint2);}
-.eng-gauges b{color:var(--grn);font-weight:600;margin-left:3px;font-size:11px;}
-.eng-btn{font-family:var(--mono);font-size:10px;letter-spacing:.04em;color:var(--ink-dim);background:linear-gradient(180deg,#212a3b,#11151e);
-  border:1px solid var(--edge);border-radius:7px;padding:7px 4px;cursor:pointer;transition:.12s;}
-.eng-btn:hover{border-color:var(--edge3);color:var(--ink);}
-.eng-btn:active{transform:scale(.96);}
+.eng-n1{display:flex;align-items:center;gap:7px;}
+.eng-n1bar{flex:1;height:9px;border-radius:5px;background:#080c12;border:1px solid var(--edge);position:relative;overflow:hidden;}
+.eng-n1fill{position:absolute;left:0;top:0;bottom:0;width:0;background:linear-gradient(90deg,var(--grn2),var(--grn));box-shadow:0 0 8px rgba(46,230,143,.4);transition:width .08s linear;}
+.eng-n1v{flex:0 0 auto;display:flex;align-items:baseline;gap:2px;}
+.eng-n1v b{font-family:var(--mono);font-size:18px;font-weight:700;color:var(--grn);line-height:1;}
+.eng-n1v span{font-family:var(--mono);font-size:8px;color:var(--ink-faint2);}
+.eng-rd{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:2px 7px;}
+.erd{display:flex;align-items:baseline;justify-content:space-between;gap:3px;font-family:var(--mono);font-size:9px;border-bottom:1px solid var(--edge);padding-bottom:1px;}
+.erd span{color:var(--ink-faint2);} .erd b{color:var(--grn);font-weight:600;font-size:10.5px;}
+.erd b.hot{color:var(--red);text-shadow:0 0 6px rgba(255,74,61,.6);}
+.eng-ctl{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:3px;margin-top:2px;}
+.echip{font-family:var(--mono);font-size:9px;letter-spacing:.02em;color:var(--ink-dim);background:linear-gradient(180deg,#212a3b,#11151e);border:1px solid var(--edge);border-radius:5px;padding:5px 0;cursor:pointer;transition:.1s;}
+.echip:hover{border-color:var(--edge3);color:var(--ink);} .echip:active{transform:scale(.94);}
+.echip.on{color:var(--grn);border-color:var(--grn2);background:linear-gradient(180deg,#14331f,#0a1c13);}
+.echip.cut.on{color:var(--amb);border-color:#7d6a1f;background:linear-gradient(180deg,#2a2208,#171005);}
+.echip.fire{border-color:#5a2420;color:#d98a82;}
+.echip.fire.on{color:var(--red);border-color:#8a2a22;background:linear-gradient(180deg,#2c1310,#180a09);}
+/* 通用紧凑按钮(燃油泵/电气/液压/故障等面板复用)— 缩小提升信息密度 */
+.eng-btn{font-family:var(--mono);font-size:10px;letter-spacing:.03em;color:var(--ink-dim);background:linear-gradient(180deg,#212a3b,#11151e);
+  border:1px solid var(--edge);border-radius:6px;padding:5px 6px;cursor:pointer;transition:.1s;}
+.eng-btn:hover{border-color:var(--edge3);color:var(--ink);} .eng-btn:active{transform:scale(.95);}
 .eng-btn.on{color:var(--grn);border-color:var(--grn2);background:linear-gradient(180deg,#14331f,#0a1c13);}
-.eng-btn.cut.on{color:var(--amb);border-color:#7d6a1f;background:linear-gradient(180deg,#2a2208,#171005);}
-.eng-btn.fire{border-color:#5a2420;color:#d98a82;}
-.eng-btn.fire.on{color:var(--red);border-color:#8a2a22;background:linear-gradient(180deg,#2c1310,#180a09);}
 /* 燃油面板:油箱 + 交输 */
 .fuel-row{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;}
 .tank{display:flex;flex-direction:column;align-items:center;gap:7px;background:linear-gradient(160deg,#141925,#0b0e16);border:1px solid var(--edge);border-radius:11px;padding:12px 10px;}
@@ -487,3 +503,31 @@ html[data-device=phone] .lights-grid{grid-template-columns:repeat(2,minmax(0,1fr
 .light-nm{font-family:var(--mono);font-size:11px;letter-spacing:.03em;color:var(--ink);min-width:0;}
 .light-tod{display:flex;align-items:center;gap:10px;margin-top:2px;}
 .light-tod .seg-todl{flex:1;margin:0;}
+
+/*==================================================================
+  信息密度致密化(用户反馈:按钮小一点 / 密度极高 / 非大按钮占屏)
+  统一缩小各面板控件 padding/font,玻璃座舱风:小控件 + 高读数密度
+==================================================================*/
+.syspanel{padding:10px 12px 12px;}
+html[data-device=phone] .syspanel{padding:8px 10px 10px;}
+.sp-title{font-size:12px;margin-bottom:9px;padding-bottom:7px;}
+.sp-hint{font-size:9px;margin-top:9px;line-height:1.5;}
+/* tab 条 */
+.ptab{font-size:10px;padding:4px 9px;border-radius:6px;}
+/* FCU */
+.fcu-tile{padding:5px 8px;min-width:54px;gap:3px;} .fcu-val{font-size:16px;} .fcu-lbl{font-size:8px;}
+.fcu-b{font-size:9px;width:22px;height:18px;} .fcu-ap{font-size:12px;padding:0 13px;}
+.fcu-mode{font-size:10px;padding:5px 10px;} .fcu-row{gap:6px;margin:4px 0 9px;} .fcu-modes{gap:5px;margin:5px 0;}
+/* ATC */
+.atc-btn{font-size:10px;padding:6px 9px;} .atc-log{padding:7px 9px;gap:5px;} .atc-msg{font-size:10px;}
+/* 灯光 */
+.lights-grid{gap:5px;margin-bottom:8px;} .light-row{padding:6px 9px;} .light-nm{font-size:10px;}
+/* 燃油 / 液压 / 电气:缩小单元 padding + gap,密排 */
+.fuel-row,.hyd-row{gap:9px;} .tank,.hyd-col{padding:9px 7px;gap:5px;}
+.elec-grid{gap:6px;} .elec-cell{padding:8px 5px;gap:5px;}
+/* 系统总控行 */
+.sysctl-row{padding:6px 5px;} .sysctl-hd{margin:7px 0 5px;}
+/* WXR / ND 控件 */
+.wxr-b,.nd-rng{padding:5px 10px;font-size:10px;}
+/* MCDU 功能/字母键再紧 */
+.fnk{font-size:8.5px;padding:6px 2px;} .mk{padding:7px 0;font-size:11px;}
