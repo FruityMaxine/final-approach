@@ -73,7 +73,10 @@ const TOD={
         haze:'28,40,56', horizon:'rgba(40,58,78,.5)', sun:null,
         bld:'#0c1018', bldLit:'#141a26', win:'rgba(255,214,120,', grid:'rgba(28,38,30,', field:[['#10180e',0.5],['#0c140a',0.42]], lightBoost:1.8, star:80, mtn:0.45},
 };
-function tod(){ return TOD[(typeof cfg!=='undefined'&&cfg.tod)||'dusk']||TOD.dusk; }
+function tod(){
+  if(typeof DAYNIGHT!=='undefined'&&DAYNIGHT.on&&DAYNIGHT.on()){ const p=DAYNIGHT.palette(); if(p)return p; }  // 连续昼夜:太阳高度角插值调色板(组21 Tick5)
+  return TOD[(typeof cfg!=='undefined'&&cfg.tod)||'dusk']||TOD.dusk;
+}
 
 //------------------ 确定性随机(布景/星空/城市一次成形,不逐帧抖) ------------------
 function mkRng(seed){let s=seed>>>0;return()=>{s=(s*1664525+1013904223)>>>0;return s/4294967296;};}

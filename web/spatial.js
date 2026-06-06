@@ -16,7 +16,7 @@ const SPATIAL={
     if(!this.active()){ this.leanRoll=lerp(this.leanRoll,0,Math.min(1,dt*2));this.somatoPitch=lerp(this.somatoPitch,0,Math.min(1,dt*2));this.refLoss=0;return; }
     // 无外参照度:夜 + 低能见/云中 + (高空缺地标)
     let rl=0;
-    const night=(typeof cfg!=='undefined'&&cfg.tod==='night');
+    const night=(typeof DAYNIGHT!=='undefined'&&DAYNIGHT.isNight)?DAYNIGHT.isNight():(typeof cfg!=='undefined'&&cfg.tod==='night');  // 连续昼夜:夜判定接太阳高度(组21 Tick5)
     const vis=(typeof WEATHER!=='undefined')?WEATHER.visibility:10000;
     const ceil=(typeof WEATHER!=='undefined')?WEATHER.ceiling:5000;
     const altft=S.alt*M_TO_FT;

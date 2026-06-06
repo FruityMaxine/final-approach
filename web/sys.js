@@ -83,6 +83,7 @@ SYS.register('panels','msn',    {on:true,label:'任务',         desc:'任务关
 SYS.register('panels','hud',    {on:true,label:'平显',         desc:'平显 HUD 增强:FPV 真实航迹矢量(含偏流)+能量管理 E 偏差+速度趋势 10s 外推'});
 SYS.register('panels','rwy',    {on:true,label:'跑道',         desc:'多跑道选择+盘旋进近:主/对向/交叉跑道(号·长·ILS·风分量)可选 + circle-to-land 目视机动'});
 SYS.register('panels','fpln',   {on:true,label:'计划',         desc:'飞行计划存档:多存档槽保存/读取当前配置 + base64 分享码导入导出(机场/机型/天气/风/跑道一键重建)'});
+SYS.register('panels','time',   {on:true,label:'昼夜',         desc:'连续昼夜系统:太阳高度角驱动天空/灯光连续过渡 + 时间流速(暂停~600x)+ 手动设时刻'});
 
 SYS.load();
 if(typeof window!=='undefined')window.SYS=SYS;

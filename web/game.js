@@ -806,6 +806,7 @@ function loop(now){
     if(typeof ATC!=='undefined')ATC.step(S,dt);             // 空管指令序列(按阶段触发,内部去抖)
     if(typeof SCENARIO!=='undefined')SCENARIO.step(S,dt);   // 故障情景训练:剧本注入+处置监测
     if(typeof DATALINK!=='undefined')DATALINK.step(S,dt);   // CPDLC 数据链报文(按阶段触发)
+    if(typeof DAYNIGHT!=='undefined')DAYNIGHT.step(dt);     // 连续昼夜:按流速推进时刻(组21 Tick5)
     Sound.update(dt); updateMaster();
     syncRuntimeUI();drawWorld();drawPFD();drawFlightDirector();
   }catch(err){console.error(err);}
@@ -868,10 +869,18 @@ document.querySelectorAll('.seg-opt[data-dev]').forEach(s=>{
 const TOD_KEY='fa.tod';
 function setTod(t){
   cfg.tod=t;try{localStorage.setItem(TOD_KEY,t);}catch(_){}
+  if(typeof DAYNIGHT!=='undefined'){ DAYNIGHT.setRate(0); DAYNIGHT.setMin({dusk:1080,noon:720,night:1320}[t]||1080); }  // 旧枚举→代表分钟(组21 Tick5)
   document.querySelectorAll('.seg-opt[data-tod]').forEach(s=>s.classList.toggle('on',s.dataset.tod===t));
 }
 document.querySelectorAll('.seg-opt[data-tod]').forEach(s=>s.addEventListener('click',()=>setTod(s.dataset.tod)));
-try{const tv=localStorage.getItem(TOD_KEY);if(tv==='dusk'||tv==='noon'||tv==='night')setTod(tv);}catch(_){}
+// 旧 fa.tod 恢复:仅当无连续昼夜持久化(fa.daynight)时才用旧枚举设代表分钟;
+// 否则只同步粗标签+UI,不覆盖 DAYNIGHT 已载入的自定义时刻(组21 Tick5)。
+try{const tv=localStorage.getItem(TOD_KEY);if(tv==='dusk'||tv==='noon'||tv==='night'){
+  if(!localStorage.getItem('fa.daynight'))setTod(tv);
+  else{ cfg.tod=tv; document.querySelectorAll('.seg-opt[data-tod]').forEach(s=>s.classList.toggle('on',s.dataset.tod===tv)); }
+}}catch(_){}
+// 初始按当前 todMin 同步一次粗标签(无 fa.tod 时也正确)
+try{ if(typeof DAYNIGHT!=='undefined')DAYNIGHT._syncCoarse(); }catch(_){}
 
 //------------------ 飞行设置面板(难度/起始/风/自由飞) ------------------
 const configEl=$('config');
