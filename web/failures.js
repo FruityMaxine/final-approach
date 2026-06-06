@@ -52,7 +52,9 @@ FAILURES.register('fuelLeak', { sys:'FUEL', msg:'FUEL LEAK', level:'caution',
   step(dt,f){ // 总油量低 → 升级为 warning
     if(typeof FUEL!=='undefined'){ f.level=FUEL.total()<2500?'warning':'caution'; f.msg=FUEL.total()<2500?'FUEL LOW · LEAK':'FUEL LEAK'; }
   }});
-FAILURES.register('hydFail',  { sys:'HYD',  msg:'HYD LO PR',  level:'caution' });   // Tick4 填液压
+FAILURES.register('hydFail',  { sys:'HYD',  msg:'HYD A LO PR', level:'caution',
+  trigger(){ if(typeof HYD!=='undefined')HYD.fail('A',true); },
+  clear(){ if(typeof HYD!=='undefined')HYD.fail('A',false); } });
 FAILURES.register('elecFail', { sys:'ELEC', msg:'ELEC FAULT', level:'caution' });   // Tick5 填电气
 FAILURES.register('tireBurst',{ sys:'GEAR', msg:'R TIRE BURST',level:'caution' });  // Tick5 填爆胎
 

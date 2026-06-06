@@ -91,6 +91,7 @@ function resetState(){
   };
   if(typeof ENGINES!=='undefined'&&ENGINES.list.length)ENGINES.reset();
   if(typeof FUEL!=='undefined')FUEL.reset();
+  if(typeof HYD!=='undefined')HYD.reset();
 }
 resetState();
 const cfg={ gyro:false, invertPitch:false, sound:true, turb:true, gyroBase:null, tod:'dusk' };
@@ -362,14 +363,18 @@ function updatePhysics(dt){
   if(S.phase==='ended'||!S.started)return;
   if(ap.active&&ap.mode==='reposition')return;
   S.t+=dt;
-  S.pitch=clamp(S.pitch+S.pitchIn*9.0*dt,-15,20);
-  S.roll+=S.rollIn*36*dt;
+  // 液压:操纵增益(液压低→俯仰/横滚迟钝沉重)
+  const hg=(typeof HYD!=='undefined')?HYD.ctrlGain():1;
+  S.pitch=clamp(S.pitch+S.pitchIn*9.0*dt*hg,-15,20);
+  S.roll+=S.rollIn*36*dt*hg;
   if(Math.abs(S.rollIn)<0.02)S.roll-=clamp(S.roll,-1,1)*Math.min(1,dt*1.8)*(Math.abs(S.roll)>0.3?1:0.5);
   S.roll=clamp(S.roll,-45,45);
   // 多发引擎:各发独立 spool/状态机(engines.js);S.N1 取队均(供 UI/EMMA/声音向后兼容)
-  if(typeof ENGINES!=='undefined'&&ENGINES.list.length){ ENGINES.step(dt,S.throttle); if(typeof FUEL!=='undefined')FUEL.step(dt); S.N1=ENGINES.avgN1(); }
+  if(typeof ENGINES!=='undefined'&&ENGINES.list.length){ ENGINES.step(dt,S.throttle); if(typeof FUEL!=='undefined')FUEL.step(dt); if(typeof HYD!=='undefined')HYD.step(dt); S.N1=ENGINES.avgN1(); }
   else { const spool=(S.throttle>S.N1?0.55:0.95); S.N1=clamp(S.N1+(S.throttle-S.N1)*Math.min(1,dt*spool*2.4),0,1); }
-  if(S.onGround&&S.spoilerArmed&&!S.spoilerOut){S.spoilerOut=true;syncSysUI();}
+  // 扰流板自动展开:需 B 系统液压(液压失→不可展)
+  if(S.onGround&&S.spoilerArmed&&!S.spoilerOut&&(typeof HYD==='undefined'||HYD.spoilerOK())){S.spoilerOut=true;syncSysUI();}
+  if(S.spoilerOut&&typeof HYD!=='undefined'&&!HYD.spoilerOK()){S.spoilerOut=false;syncSysUI();}  // 液压失→扰流板收回失效
   const gustMul=(WIND.gustMul!=null?WIND.gustMul:(cfg.turb?1:0));
   if(gustMul>0&&!S.onGround){
     const inten=clamp(S.alt/140,0.25,1)*gustMul;
@@ -410,7 +415,7 @@ function updatePhysics(dt){
     const hs=Math.max(0,S.V*Math.cos(S.gamma)-WIND.head), vs=S.V*Math.sin(S.gamma);
     S.z+=hs*dt; S.alt+=vs*dt;
     // 偏航:坡度协调 + 脚舵 + 不对称推力(失效发动机把机头拉向死发一侧)
-    const psiDot=(AC.g*Math.tan(S.roll*RAD))/S.V + S.rudder*0.42 + yawThrust;
+    const psiDot=(AC.g*Math.tan(S.roll*RAD))/S.V + S.rudder*0.42*hg + yawThrust;
     S.hdg=clamp(S.hdg+psiDot*DEG*dt-S.beta*0.015,-40,40);
     S.x+=(S.V*Math.sin(S.hdg*RAD)+crosswindAt(S.alt))*dt;
     S.beta=lerp(S.beta,S.rudder*10-S.roll*0.42,Math.min(1,dt*2.5));
@@ -419,7 +424,8 @@ function updatePhysics(dt){
     if(S.z>RWY.L+DF().overflyEnd&&S.phase!=='goaround')endGame('overfly');
   }else{
     const d=DF(),offRwy=Math.abs(S.x)>RWY.W/2,grass=offRwy?d.grassMu:0;
-    const fric=(0.02+grass+(S.brake?0.35:0))*W;
+    const bg=(typeof HYD!=='undefined')?HYD.brakeGain():1;
+    const fric=(0.02+grass+(S.brake?0.35*bg:0))*W;
     const Vdot=(T-fric-D)/AC.m;
     S.V=Math.max(0,S.V+Vdot*dt);
     S.z+=S.V*dt; S.x+=(S.V*Math.sin(S.hdg*RAD)+crosswindAt(S.alt)*0.7)*dt;

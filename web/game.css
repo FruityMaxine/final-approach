@@ -335,3 +335,13 @@ html[data-device=desktop] .sysbtn .kbdhint{display:block;}
 .ecam-msg{font-family:var(--mono);font-size:12px;font-weight:700;letter-spacing:.05em;}
 .ecam-msg.warning{color:var(--red);} .ecam-msg.caution{color:var(--amb);}
 .ecam-ok{font-family:var(--mono);font-size:11px;color:var(--grn2);}
+/* 液压面板 */
+.hyd-row{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;}
+.hyd-col{display:flex;flex-direction:column;align-items:center;gap:6px;background:linear-gradient(160deg,#141925,#0b0e16);border:1px solid var(--edge);border-radius:11px;padding:12px 10px;}
+.hyd-nm{font-family:var(--mono);font-size:11px;font-weight:700;letter-spacing:.08em;color:var(--ink);}
+.hyd-bar{width:42px;height:110px;background:#080c12;border:1px solid var(--edge);border-radius:7px;position:relative;overflow:hidden;}
+.hyd-fill{position:absolute;left:0;right:0;bottom:0;height:100%;background:linear-gradient(180deg,var(--grn),var(--grn2));box-shadow:0 0 10px rgba(46,230,143,.35);transition:height .15s linear;}
+.hyd-fill.lo{background:linear-gradient(180deg,var(--red),#8a1d14);box-shadow:0 0 10px rgba(255,74,61,.5);}
+.hyd-p{font-family:var(--mono);font-size:12px;font-weight:600;color:var(--grn);}
+.hyd-p::after{content:' psi';font-size:8px;color:var(--ink-faint2);}
+.hyd-src{font-family:var(--mono);font-size:8px;color:var(--ink-faint2);text-align:center;line-height:1.3;}
