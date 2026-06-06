@@ -69,6 +69,7 @@ SYS.register('panels','atc',    {on:true,label:'无线电',       desc:'ATC 空�
 SYS.register('panels','wxr',    {on:true,label:'气象雷达',     desc:'WXR 扇形扫描气象回波:绿/黄/红强度 + 量程 + GAIN/TILT'});
 SYS.register('panels','lights', {on:true,label:'灯光',         desc:'夜航光环境:进近灯/边灯/RAIL/REIL/滑行道/着陆/频闪/信标/航行灯 + 时段'});
 SYS.register('panels','sd',     {on:true,label:'SD系统',       desc:'系统显示 synoptic:HYD/ELEC/FUEL/BLEED/ENG/STATUS 只读示意 + 推力模式'});
+SYS.register('panels','perf',   {on:true,label:'性能',         desc:'PERF 性能计算:V1/VR/V2/Vref/Vapp + 起降距离余量(按质量/跑道/风)'});
 
 SYS.load();
 if(typeof window!=='undefined')window.SYS=SYS;

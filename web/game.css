@@ -569,3 +569,23 @@ html[data-device=phone] .syspanel{padding:8px 10px 10px;}
 .sd-allok{font-family:var(--mono);font-size:12px;color:var(--grn);text-align:center;padding:18px 6px;letter-spacing:.08em;}
 .sd-foot{font-family:var(--mono);font-size:8.5px;color:var(--ink-faint2);margin-top:8px;line-height:1.5;text-align:center;}
 .sd-empty{font-family:var(--mono);font-size:11px;color:var(--ink-faint2);text-align:center;padding:18px;}
+
+/* PERF 性能计算(高密度读数网格,手机零横滚) */
+.pf-ctl{display:flex;flex-wrap:wrap;align-items:center;gap:6px;margin-bottom:9px;}
+.pf-lbl{font-family:var(--mono);font-size:10px;color:var(--ink-faint2);}
+.pf-b{font-family:var(--mono);font-size:13px;color:var(--ink-dim);background:#11151e;border:1px solid var(--edge2);border-radius:5px;width:24px;height:22px;cursor:pointer;}
+.pf-b:hover{color:var(--ink);border-color:var(--edge3);}
+.pf-oat{font-family:var(--mono);font-size:14px;font-weight:700;color:var(--cyan);min-width:26px;text-align:center;}
+.pf-apply{flex:1 1 auto;font-family:var(--mono);font-size:10px;color:var(--cyan);background:linear-gradient(180deg,#0c3a52,#08222f);border:1px solid #1d6fb0;border-radius:6px;padding:6px 8px;cursor:pointer;transition:.12s;}
+.pf-apply:hover{box-shadow:0 0 8px rgba(42,216,255,.3);} .pf-apply:active{transform:scale(.97);}
+.pf-screen{background:#070a10;border:1px solid var(--edge);border-radius:8px;padding:9px 10px;}
+.pf-gw{font-family:var(--mono);font-size:9.5px;color:var(--ink-dim);text-align:center;margin-bottom:7px;line-height:1.5;}
+.pf-gw b{color:var(--ink);}
+.pf-sec{font-family:var(--mono);font-size:10px;font-weight:700;letter-spacing:.08em;color:var(--cyan);margin:6px 0 4px;border-bottom:1px solid var(--edge);padding-bottom:3px;}
+.pf-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:4px 7px;}
+.pf-cell{display:flex;flex-direction:column;gap:1px;background:linear-gradient(160deg,#141925,#0b0e16);border:1px solid var(--edge);border-radius:6px;padding:4px 7px;}
+.pf-cell>span{font-family:var(--mono);font-size:8px;color:var(--ink-faint2);letter-spacing:.04em;}
+.pf-cell>b{font-family:var(--mono);font-size:14px;font-weight:700;color:var(--grn);line-height:1.1;}
+.pf-cell>b small{font-size:7px;color:var(--ink-faint2);margin-left:1px;}
+.pf-cell.ok>b{color:var(--grn);} .pf-cell.ok{border-color:var(--grn2);}
+.pf-cell.no>b{color:var(--red);} .pf-cell.no{border-color:#8a2a22;background:#1a0c0a;}
