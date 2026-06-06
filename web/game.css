@@ -456,3 +456,17 @@ html[data-device=phone] .fcu-row{gap:6px;}
 .fcu-mode{font-family:var(--mono);font-size:11px;color:var(--ink-dim);background:linear-gradient(180deg,#1a2030,#11151e);border:1px solid var(--edge2);border-radius:7px;padding:6px 12px;cursor:pointer;transition:.12s;}
 .fcu-mode:hover{color:var(--ink);border-color:var(--edge3);}
 .fcu-mode.on{color:var(--cyan);border-color:#1d6fb0;background:linear-gradient(180deg,#0c3a52,#08222f);box-shadow:0 0 8px rgba(42,216,255,.25);}
+/* 无线电 / ATC 通信面板(手机零横向溢出:日志纵列换行,按钮 flex-wrap) */
+.atc-freq{font-family:var(--mono);font-size:11px;letter-spacing:.04em;color:var(--ink-dim);margin-bottom:8px;}
+.atc-freq b{color:var(--cyan);}
+.atc-log{background:#070a10;border:1px solid var(--edge);border-radius:8px;padding:8px 10px;display:flex;flex-direction:column;gap:6px;max-height:46vh;overflow-y:auto;overflow-x:hidden;}
+.atc-msg{display:flex;flex-wrap:wrap;align-items:baseline;gap:5px 7px;font-family:var(--mono);font-size:11px;line-height:1.35;}
+.atc-t{font-size:9px;color:var(--ink-faint2);flex:0 0 auto;}
+.atc-who{font-size:9px;font-weight:700;letter-spacing:.06em;flex:0 0 auto;}
+.atc-msg.atc .atc-who{color:var(--cyan);} .atc-msg.you .atc-who{color:var(--grn);}
+.atc-tx{flex:1 1 100%;color:var(--ink);word-break:break-word;}
+.atc-msg.you .atc-tx{color:var(--grn);}
+.atc-empty{font-family:var(--mono);font-size:11px;color:var(--ink-faint2);text-align:center;padding:18px 6px;}
+.atc-reply{display:flex;flex-wrap:wrap;gap:7px;margin-top:10px;}
+.atc-btn{flex:1 1 auto;font-family:var(--mono);font-size:11px;letter-spacing:.05em;color:var(--ink-dim);background:linear-gradient(180deg,#1a2030,#11151e);border:1px solid var(--edge2);border-radius:8px;padding:9px 10px;cursor:pointer;transition:.12s;}
+.atc-btn:hover{color:var(--ink);border-color:var(--edge3);} .atc-btn:active{transform:scale(.96);}

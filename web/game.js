@@ -580,6 +580,7 @@ function doReset(){
   ap.engage={pitch:1,roll:1,throttle:1,rudder:1};ap.manualT={pitch:0,roll:0,throttle:0,rudder:0};
   resetState();S.started=true;
   if(typeof REPLAY!=='undefined')REPLAY.start();   // 重新进近:重开轨迹录制
+  if(typeof ATC!=='undefined')ATC.reset();         // 重新进近:重置空管
   syncThrottleUI();syncFlapUI();syncSysUI();updateStickKnob();updateRudderUI();updateEmmaBtn();
   calloutEl.classList.remove('show');
   if(typeof revealTags==='function')revealTags(4500);
@@ -794,6 +795,7 @@ function loop(now){
     if(typeof SPATIAL!=='undefined')SPATIAL.update(dt,S);   // 空间迷向错觉(只偏外景,PFD 真实)
     if(typeof TUTORIAL!=='undefined')TUTORIAL.update(S,dt); // 新手教学逐帧检测完成→自动进下一步
     if(typeof REPLAY!=='undefined')REPLAY.sample(S,dt);     // 飞行轨迹节流记录(REC_DT 内部节流)
+    if(typeof ATC!=='undefined')ATC.step(S,dt);             // 空管指令序列(按阶段触发,内部去抖)
     Sound.update(dt); updateMaster();
     syncRuntimeUI();drawWorld();drawPFD();drawFlightDirector();
   }catch(err){console.error(err);}
@@ -821,6 +823,7 @@ function startFlight(){
   setTimeout(()=>Sound.say('cleared to land, runway two seven'),300);
   if(typeof TUTORIAL!=='undefined'&&typeof SYS!=='undefined'&&SYS.get('features','tutorial'))TUTORIAL.start();
   if(typeof REPLAY!=='undefined')REPLAY.start();   // 开录飞行轨迹
+  if(typeof ATC!=='undefined')ATC.reset();         // 重置空管通信
 }
 $('startBtn').addEventListener('click',startFlight);
 $('helpHint').addEventListener('click',()=>helpEl.classList.add('show'));
