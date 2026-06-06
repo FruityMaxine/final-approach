@@ -171,6 +171,7 @@ function drawWorld(){
   drawPAPI();
   if(typeof drawIMC==='function')drawIMC();   // IMC 仪表气象:云中白化/低能见度雾(覆于外景,HUD 之下)
   if(typeof LIGHTS!=='undefined')LIGHTS.drawAircraftGlow(T);   // 机身灯首视反射(覆于雾上:航行灯/频闪/信标)
+  if(typeof GHOST!=='undefined'&&GHOST.enabled)GHOST.draw();   // 幽灵航迹叠加(最佳进近线,复用 project 投影)
   drawHUD();
 }
 

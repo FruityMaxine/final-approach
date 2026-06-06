@@ -649,3 +649,14 @@ html[data-device=phone] .syspanel{padding:8px 10px 10px;}
 .hi-meta{flex:1;min-width:0;color:var(--ink-dim);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
 .hi-tm{flex:0 0 auto;color:var(--ink-faint2);font-size:9px;}
 .hi-empty{font-family:var(--mono);font-size:10px;color:var(--ink-faint2);text-align:center;padding:14px;}
+
+/* 幽灵轨迹开关面板 */
+.gh-row{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:10px;}
+.gh-txt{display:flex;flex-direction:column;min-width:0;}
+.gh-txt b{font-family:var(--mono);font-size:12px;color:var(--ink);}
+.gh-txt span{font-family:var(--mono);font-size:9px;color:var(--ink-faint2);margin-top:2px;line-height:1.4;}
+.gh-best{display:flex;align-items:center;justify-content:space-between;gap:10px;background:#070a10;border:1px solid var(--edge);border-radius:8px;padding:9px 11px;margin-bottom:9px;font-family:var(--mono);}
+.gh-best span{font-size:10px;color:var(--ink-faint2);} .gh-best b{font-size:17px;font-weight:700;color:var(--cyan);}
+.gh-best b.none{font-size:10px;color:var(--ink-faint2);font-weight:400;}
+.gh-clr{width:100%;font-family:var(--mono);font-size:10px;color:var(--ink-dim);background:#11151e;border:1px solid var(--edge2);border-radius:6px;padding:7px;cursor:pointer;}
+.gh-clr:hover{color:var(--red);border-color:#8a2a22;}

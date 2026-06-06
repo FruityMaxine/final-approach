@@ -538,6 +538,7 @@ function endGame(reason){
   else if(score>=50){grade='D';gc=getC('--amb');verdict='勉强落地';}
   else{grade='E';gc=getC('--red');verdict='粗糙的着陆';}
   if(typeof HISTORY!=='undefined')HISTORY.record({score:score|0,grade,fpm:fpm|0,tdz:tdz|0,xoff:+xoff.toFixed(1)});   // 履历记录
+  if(typeof GHOST!=='undefined'&&typeof REPLAY!=='undefined')GHOST.maybeSave(RWY.aptName,REPLAY.buf,score);   // 幽灵:超最佳则存轨迹
   showReport(grade,gc,verdict,
     '综合评分 '+(score|0)+'/100。着陆质量取决于稳定进近——下滑道、中线、速度在最后 30 秒都不能松手。',
     [['触地下降率',(fpm|0)+' fpm',fpm<300?'柔和':(fpm<600?'偏硬':'重着陆')],
