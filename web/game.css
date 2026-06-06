@@ -93,7 +93,10 @@ html,body{width:100%;height:100%;overflow:hidden;background:var(--bg);color:var(
 .n1fill.rev{background:linear-gradient(180deg,var(--amb),#c98a14);box-shadow:0 0 12px rgba(255,176,46,.4);}
 .n1redline{position:absolute;left:0;right:0;top:8%;height:1px;background:var(--red);opacity:.6;}
 .n1num{font-family:var(--mono);font-size:13px;font-weight:600;color:var(--grn);}
+.n1num.failed{color:var(--red);}
 .n1tag{font-family:var(--mono);font-size:8px;color:var(--ink-faint2);}
+.egtnum{font-family:var(--mono);font-size:7px;color:var(--ink-faint2);margin-top:1px;}
+.n1fill.failed{background:linear-gradient(180deg,#8a2a22,#3a1410)!important;box-shadow:none!important;}
 
 /* 油门 */
 #thrmod{padding:7px 6px 8px;align-items:center;}

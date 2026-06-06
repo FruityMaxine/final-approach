@@ -89,6 +89,7 @@ function resetState(){
     gustG:0, gustR:0, gustTheta:0,
     calls:{}, lastBand:9999,
   };
+  if(typeof ENGINES!=='undefined'&&ENGINES.list.length)ENGINES.reset();
 }
 resetState();
 const cfg={ gyro:false, invertPitch:false, sound:true, turb:true, gyroBase:null, tod:'dusk' };
@@ -364,8 +365,9 @@ function updatePhysics(dt){
   S.roll+=S.rollIn*36*dt;
   if(Math.abs(S.rollIn)<0.02)S.roll-=clamp(S.roll,-1,1)*Math.min(1,dt*1.8)*(Math.abs(S.roll)>0.3?1:0.5);
   S.roll=clamp(S.roll,-45,45);
-  const spool=(S.throttle>S.N1?0.55:0.95);
-  S.N1=clamp(S.N1+(S.throttle-S.N1)*Math.min(1,dt*spool*2.4),0,1);
+  // 多发引擎:各发独立 spool/状态机(engines.js);S.N1 取队均(供 UI/EMMA/声音向后兼容)
+  if(typeof ENGINES!=='undefined'&&ENGINES.list.length){ ENGINES.step(dt,S.throttle); S.N1=ENGINES.avgN1(); }
+  else { const spool=(S.throttle>S.N1?0.55:0.95); S.N1=clamp(S.N1+(S.throttle-S.N1)*Math.min(1,dt*spool*2.4),0,1); }
   if(S.onGround&&S.spoilerArmed&&!S.spoilerOut){S.spoilerOut=true;syncSysUI();}
   const gustMul=(WIND.gustMul!=null?WIND.gustMul:(cfg.turb?1:0));
   if(gustMul>0&&!S.onGround){
@@ -393,8 +395,10 @@ function updatePhysics(dt){
   if(S.spoilerOut)CL*=(1-AC.spoilerLiftLoss);
   let CD=AC.CD0+geK*CL*CL+AC.flapCD[S.flaps]+(S.gearDown?AC.gearCD:0)+(S.spoilerOut?AC.spoilerCD:0);
   const q=0.5*AC.rho*V*V, L=q*AC.S*CL, D=q*AC.S*CD, W=AC.m*AC.g;
-  let T=S.N1*AC.maxThrust;
-  if(S.reverse&&S.onGround)T=-S.N1*AC.maxThrust*AC.revFactor;
+  // 总推力 = Σ各发(engines.js);失效/不对称发动机自然减少总推力
+  let T,yawThrust=0;
+  if(typeof ENGINES!=='undefined'&&ENGINES.list.length){ T=ENGINES.totalThrust(S.reverse,S.onGround); yawThrust=ENGINES.yawFromThrust(); }
+  else { T=S.N1*AC.maxThrust; if(S.reverse&&S.onGround)T=-S.N1*AC.maxThrust*AC.revFactor; }
 
   if(!S.onGround){
     const aoaR=aoa*RAD;
@@ -404,7 +408,8 @@ function updatePhysics(dt){
     S.gamma=clamp(S.gamma+gammaDot*dt,-12*RAD,12*RAD);
     const hs=Math.max(0,S.V*Math.cos(S.gamma)-WIND.head), vs=S.V*Math.sin(S.gamma);
     S.z+=hs*dt; S.alt+=vs*dt;
-    const psiDot=(AC.g*Math.tan(S.roll*RAD))/S.V + S.rudder*0.42;
+    // 偏航:坡度协调 + 脚舵 + 不对称推力(失效发动机把机头拉向死发一侧)
+    const psiDot=(AC.g*Math.tan(S.roll*RAD))/S.V + S.rudder*0.42 + yawThrust;
     S.hdg=clamp(S.hdg+psiDot*DEG*dt-S.beta*0.015,-40,40);
     S.x+=(S.V*Math.sin(S.hdg*RAD)+crosswindAt(S.alt))*dt;
     S.beta=lerp(S.beta,S.rudder*10-S.roll*0.42,Math.min(1,dt*2.5));
@@ -674,11 +679,30 @@ function drawILS(ctx,x,y,w,h){
 //==================================================================
 // 运行期 UI + 主循环
 //==================================================================
+// EICAS:按发动机数动态生成 N1 列(2 或 4 发),每列 N1 条+数值+EGT
+function renderEICAS(){
+  const m=$('n1mod'); if(!m||typeof ENGINES==='undefined'||!ENGINES.list.length)return;
+  let h='<div class="lbl" style="margin-bottom:5px;">N1 % · '+ENGINES.count+' ENG</div><div class="n1row">';
+  for(const e of ENGINES.list){
+    h+='<div class="n1unit"><div class="n1bar"><div class="n1redline"></div><div class="n1fill" id="n1fill'+e.id+'"></div></div>'
+      +'<div class="n1num" id="n1num'+e.id+'">'+Math.round(e.n1*100)+'</div>'
+      +'<div class="n1tag">E'+e.id+'</div>'
+      +'<div class="egtnum" id="egt'+e.id+'">'+Math.round(e.egt)+'°</div></div>';
+  }
+  m.innerHTML=h+'</div>';
+}
 function syncRuntimeUI(){
-  const n1=Math.round(S.N1*100);
-  $('n1fillL').style.height=n1+'%';$('n1fillR').style.height=n1+'%';
-  $('n1numL').textContent=n1;$('n1numR').textContent=n1;$('thrN1').textContent=n1+'%';
-  const rev=S.reverse&&S.onGround;$('n1fillL').classList.toggle('rev',rev);$('n1fillR').classList.toggle('rev',rev);
+  const avg=Math.round((typeof ENGINES!=='undefined'&&ENGINES.list.length?ENGINES.avgN1():S.N1)*100);
+  $('thrN1').textContent=avg+'%';
+  if(typeof ENGINES!=='undefined'&&ENGINES.list.length){
+    const rev=S.reverse&&S.onGround;
+    for(const e of ENGINES.list){
+      const f=$('n1fill'+e.id),nu=$('n1num'+e.id),eg=$('egt'+e.id);
+      if(f){f.style.height=Math.round(e.n1*100)+'%';f.classList.toggle('rev',rev&&e.state==='run');f.classList.toggle('failed',e.state==='fail'||e.state==='off');}
+      if(nu){nu.textContent=Math.round(e.n1*100);nu.classList.toggle('failed',e.state==='fail'||e.state==='off');}
+      if(eg)eg.textContent=Math.round(e.egt)+'°';
+    }
+  } else { const n1=avg; const f1=$('n1fillL'),f2=$('n1fillR');if(f1)f1.style.height=n1+'%';if(f2)f2.style.height=n1+'%'; }
   const pm={approach:'进近',flare:'拉平',rollout:'滑跑',goaround:'复飞',ended:'结束'};
   $('phasetxt').textContent=pm[S.phase]||S.phase;
   $('phaseBadge').classList.toggle('warn',S.phase==='flare'||S.phase==='goaround');
@@ -756,6 +780,7 @@ function updateWindUI(){
 function syncConfigUI(){
   document.querySelectorAll('.seg-opt[data-diff]').forEach(s=>s.classList.toggle('on',s.dataset.diff===CONFIG.diff));
   document.querySelectorAll('.seg-opt[data-start]').forEach(s=>s.classList.toggle('on',s.dataset.start===CONFIG.start));
+  document.querySelectorAll('.seg-opt[data-eng]').forEach(s=>s.classList.toggle('on',+s.dataset.eng===CONFIG.engines));
   const ws=$('cfgWindSpeed');if(ws)ws.value=CONFIG.windSpeed;
   const wd=$('cfgWindDir');if(wd)wd.value=CONFIG.windDir;
   $('swFree').classList.toggle('on',CONFIG.freeFlight);
@@ -763,6 +788,7 @@ function syncConfigUI(){
 }
 document.querySelectorAll('.seg-opt[data-diff]').forEach(s=>s.addEventListener('click',()=>{applyDifficulty(s.dataset.diff);syncConfigUI();}));
 document.querySelectorAll('.seg-opt[data-start]').forEach(s=>s.addEventListener('click',()=>{CONFIG.start=s.dataset.start;saveConfig();syncConfigUI();}));
+document.querySelectorAll('.seg-opt[data-eng]').forEach(s=>s.addEventListener('click',()=>{CONFIG.engines=+s.dataset.eng;saveConfig();if(typeof ENGINES!=='undefined'){ENGINES.setCount(CONFIG.engines);resetState();}syncConfigUI();}));
 $('cfgWindSpeed').addEventListener('input',e=>{CONFIG.windSpeed=+e.target.value;applyConfig();updateWindUI();});
 $('cfgWindDir').addEventListener('input',e=>{CONFIG.windDir=+e.target.value;applyConfig();updateWindUI();});
 $('swFree').addEventListener('click',()=>{CONFIG.freeFlight=!CONFIG.freeFlight;$('swFree').classList.toggle('on',CONFIG.freeFlight);saveConfig();});
@@ -790,6 +816,8 @@ if(typeof SYS!=='undefined'){
   $('swSound').classList.toggle('on',cfg.sound);
   if(typeof applyConfig==='function')applyConfig();
 }
+// 多发引擎:按配置初始化发动机数(默认 2,可配 4)+ 渲染 EICAS
+if(typeof ENGINES!=='undefined'){ ENGINES.setCount((typeof CONFIG!=='undefined'&&CONFIG.engines)||2); resetState(); }
 DeviceMode.init();
 if(typeof syncConfigUI==='function')syncConfigUI();
 setLayout();resizeWorld();resizePFD();

@@ -30,7 +30,7 @@ const STARTS={
   cruise:{ name:'高位切入', z:-14500, alt:820, V:92, label:'7.8 NM · 2700 ft' },
 };
 // 当前配置(localStorage 持久化)
-const CONFIG={ diff:'real', start:'short', windDir:280, windSpeed:8, freeFlight:false };
+const CONFIG={ diff:'real', start:'short', windDir:280, windSpeed:8, freeFlight:false, engines:2 };
 const CFG_KEY='fa.config';
 
 function curDiff(){ return DIFF[CONFIG.diff]||DIFF.real; }
@@ -63,6 +63,7 @@ function loadConfig(){
       if(typeof v.windDir==='number')CONFIG.windDir=v.windDir;
       if(typeof v.windSpeed==='number')CONFIG.windSpeed=v.windSpeed;
       CONFIG.freeFlight=!!v.freeFlight;
+      if(v.engines===2||v.engines===4)CONFIG.engines=v.engines;
     }
   }catch(_){}
 }

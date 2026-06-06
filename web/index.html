@@ -155,6 +155,12 @@
       <div class="seg-opt" data-start="cruise">高位切入<span class="sub">7.8 NM</span></div>
     </div>
   </div>
+  <div class="cfg-grp"><span class="lbl">发动机</span>
+    <div class="seg">
+      <div class="seg-opt on" data-eng="2">双发<span class="sub">窄体客机</span></div>
+      <div class="seg-opt" data-eng="4">四发<span class="sub">宽体 / 不对称推力</span></div>
+    </div>
+  </div>
   <div class="cfg-grp"><span class="lbl">风 &nbsp;<span id="cfgWindVal" style="color:var(--amb);">280° / 8 kt</span></span>
     <div style="display:flex;align-items:center;gap:10px;margin-top:6px;"><span class="lbl" style="width:42px;">风速</span><input type="range" id="cfgWindSpeed" class="rng" min="0" max="35" value="8"></div>
     <div style="display:flex;align-items:center;gap:10px;margin-top:8px;"><span class="lbl" style="width:42px;">风向</span><input type="range" id="cfgWindDir" class="rng" min="180" max="360" value="280"></div>
@@ -233,6 +239,7 @@
 <!-- 模块化:sys(中央开关注册表)最先 → config/render/emma 先加载定义,game.js 末尾装配+主循环 -->
 <script src="sys.js"></script>
 <script src="config.js"></script>
+<script src="engines.js"></script>
 <script src="render.js"></script>
 <script src="emma.js"></script>
 <script src="game.js"></script>
