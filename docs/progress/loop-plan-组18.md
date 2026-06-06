@@ -32,7 +32,7 @@ betterloop-auditor(opus)审 **4/4 全 PASS**。挂接点全核实无重叠(SD sy
 
 ## 进度
 - [x] Tick1 计划(本文件 + auditor 4/4 PASS + 挂接点核实无重叠) — 2026-06-06
-- [ ] Tick2 v0.35 SD 系统显示
+- [x] Tick2 v0.35 SD系统显示(sd.js 6页只读synoptic:HYD/ELEC/FUEL/BLEED/ENG/STATUS+推力模式CLB/MCT/TOGA;读实时态+页切+HYD失效真反映+手机零横滚实测PASS) — 2026-06-06
 - [ ] Tick3 v0.36 PERF 性能计算
 - [ ] Tick4 v0.37 ECL 检查单
 - [ ] Tick5 v0.38 故障情景训练

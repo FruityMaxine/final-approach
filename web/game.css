@@ -531,3 +531,41 @@ html[data-device=phone] .syspanel{padding:8px 10px 10px;}
 .wxr-b,.nd-rng{padding:5px 10px;font-size:10px;}
 /* MCDU 功能/字母键再紧 */
 .fnk{font-size:8.5px;padding:6px 2px;} .mk{padding:7px 0;font-size:11px;}
+
+/* SD 系统显示 synoptic(只读高密度示意,手机零横滚) */
+.sd-thr{font-family:var(--mono);font-size:11px;font-weight:700;padding:1px 7px;border-radius:5px;letter-spacing:.06em;}
+.sd-thr.m-TOGA{color:#fff;background:#8a2a22;} .sd-thr.m-CLB{color:var(--grn);background:#0c2a1c;}
+.sd-thr.m-MCT{color:var(--cyan);background:#08222f;} .sd-thr.m-IDLE{color:var(--ink-dim);background:#11151e;}
+.sd-tabs{display:flex;flex-wrap:wrap;gap:4px;margin-bottom:9px;}
+.sd-tab{flex:1 1 auto;font-family:var(--mono);font-size:10px;color:var(--ink-dim);background:linear-gradient(180deg,#1a2030,#11151e);border:1px solid var(--edge2);border-radius:6px;padding:5px 4px;cursor:pointer;transition:.1s;}
+.sd-tab.on{color:var(--cyan);border-color:#1d6fb0;background:linear-gradient(180deg,#0c3a52,#08222f);}
+.sd-screen{background:#070a10;border:1px solid var(--edge);border-radius:8px;padding:9px 10px;min-height:120px;}
+.sd-grid3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;}
+.sd-col{display:flex;flex-direction:column;align-items:center;gap:4px;background:linear-gradient(160deg,#141925,#0b0e16);border:1px solid var(--edge);border-radius:8px;padding:7px 5px;}
+.sd-h{font-family:var(--mono);font-size:10px;font-weight:700;letter-spacing:.06em;color:var(--ink);}
+.sd-bar{width:18px;height:42px;border-radius:4px;background:#080c12;border:1px solid var(--edge);position:relative;overflow:hidden;}
+.sd-bar>i{position:absolute;left:0;right:0;bottom:0;background:linear-gradient(180deg,var(--grn),var(--grn2));}
+.sd-bar>i.r{background:linear-gradient(180deg,#ff4a3d,#8a2a22);} .sd-bar>i.g{background:linear-gradient(180deg,var(--grn),var(--grn2));}
+.sd-val{font-family:var(--mono);font-size:13px;font-weight:700;color:var(--grn);} .sd-val.lo{color:var(--red);}
+.sd-val small{font-size:7px;color:var(--ink-faint2);margin-left:1px;}
+.sd-tag{font-family:var(--mono);font-size:8px;color:var(--ink-faint2);}
+.sd-st{font-family:var(--mono);font-size:9px;font-weight:700;padding:1px 6px;border-radius:4px;}
+.sd-st.ok{color:var(--grn);background:#0c2a1c;} .sd-st.wr{color:var(--red);background:#2a0f0c;}
+.sd-node{display:flex;align-items:center;gap:4px;font-family:var(--mono);font-size:9px;padding:3px 7px;border-radius:5px;border:1px solid var(--edge2);}
+.sd-node.on{color:var(--grn);border-color:var(--grn2);background:#0c2a1c;} .sd-node.off{color:var(--ink-faint2);background:#0b0f17;}
+.sd-node b{color:inherit;}
+.sd-elec{display:flex;flex-direction:column;align-items:center;gap:6px;}
+.sd-row,.sd-busrow{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;align-items:center;}
+.sd-line{width:2px;height:12px;background:var(--edge2);} .sd-line.live{background:var(--grn);box-shadow:0 0 6px var(--grn);} .sd-line.dead{background:#3a2020;}
+.sd-bus{font-family:var(--mono);font-size:11px;font-weight:700;letter-spacing:.08em;padding:4px 14px;border-radius:6px;border:1px solid var(--edge2);}
+.sd-bus.live{color:var(--grn);border-color:var(--grn2);background:#0c2a1c;} .sd-bus.dead{color:var(--ink-faint2);background:#0b0f17;}
+.sd-xf{font-family:var(--mono);font-size:10px;text-align:center;margin-top:8px;padding:4px;border-radius:6px;}
+.sd-xf.open{color:var(--cyan);background:#08222f;} .sd-xf.shut{color:var(--ink-dim);background:#0b0f17;}
+.sd-tbl{width:100%;border-collapse:collapse;font-family:var(--mono);font-size:10px;}
+.sd-tbl th{color:var(--ink-faint2);font-size:8px;font-weight:600;text-align:center;padding:2px;border-bottom:1px solid var(--edge);}
+.sd-tbl td{color:var(--grn);text-align:center;padding:3px 2px;border-bottom:1px solid var(--edge);}
+.sd-tbl td:first-child{color:var(--ink);font-weight:700;}
+.sd-inop{display:flex;flex-direction:column;gap:4px;} .sd-inopx{font-family:var(--mono);font-size:11px;color:var(--amb);background:#2a1c08;border:1px solid #5a4420;border-radius:5px;padding:5px 9px;}
+.sd-allok{font-family:var(--mono);font-size:12px;color:var(--grn);text-align:center;padding:18px 6px;letter-spacing:.08em;}
+.sd-foot{font-family:var(--mono);font-size:8.5px;color:var(--ink-faint2);margin-top:8px;line-height:1.5;text-align:center;}
+.sd-empty{font-family:var(--mono);font-size:11px;color:var(--ink-faint2);text-align:center;padding:18px;}
