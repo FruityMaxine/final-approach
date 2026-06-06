@@ -298,8 +298,11 @@ html[data-device=phone] #panelHost{font-size:.92em;}
 .sp-title{font-family:var(--mono);font-size:13px;letter-spacing:.1em;color:var(--cyan);text-transform:uppercase;margin-bottom:14px;border-bottom:1px solid var(--edge);padding-bottom:8px;}
 .sp-hint{font-family:var(--mono);font-size:10px;color:var(--ink-faint2);margin-top:14px;line-height:1.6;}
 .eng-grid{display:grid;gap:10px;}
-.eng-grid.eng-2{grid-template-columns:repeat(2,1fr);}
-.eng-grid.eng-4{grid-template-columns:repeat(4,1fr);}
+.eng-grid.eng-2{grid-template-columns:repeat(2,minmax(0,1fr));}
+.eng-grid.eng-4{grid-template-columns:repeat(4,minmax(0,1fr));}
+/* 手机:4 发横排会溢出 → 2×2 排布 */
+html[data-device=phone] .eng-grid.eng-4{grid-template-columns:repeat(2,minmax(0,1fr));}
+html[data-device=phone] .eng-col{padding:9px 6px;gap:5px;}
 .eng-col{background:linear-gradient(160deg,#141925,#0b0e16);border:1px solid var(--edge);border-radius:11px;padding:11px 9px;display:flex;flex-direction:column;gap:7px;}
 .eng-hd{font-family:var(--mono);font-size:12px;font-weight:700;letter-spacing:.1em;color:var(--ink);text-align:center;}
 .eng-state{font-family:var(--mono);font-size:11px;font-weight:700;text-align:center;padding:4px;border-radius:6px;background:#0b0f17;color:var(--ink-dim);}
