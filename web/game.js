@@ -438,7 +438,8 @@ function updatePhysics(dt){
   }else{
     const d=DF(),offRwy=Math.abs(S.x)>RWY.W/2,grass=offRwy?d.grassMu:0;
     const bg=(typeof HYD!=='undefined')?HYD.brakeGain():1;
-    const fric=(0.02+grass+(S.brake?0.35*bg:0))*W;
+    const rwMu=(typeof PRECIP!=='undefined')?PRECIP.mu():1;   // 跑道污染(湿/雪)降刹车效能
+    const fric=(0.02+grass+(S.brake?0.35*bg*rwMu:0))*W;
     // 爆胎:滑跑时持续拉向爆胎(右)侧 + 该侧刹车失效
     if(typeof FAILURES!=='undefined'&&FAILURES.reg.tireBurst&&FAILURES.reg.tireBurst.active){
       S.hdg=clamp(S.hdg+14*dt,-25,25); S.x+=2.4*dt*S.V*0.04;

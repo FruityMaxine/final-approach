@@ -77,6 +77,7 @@ SYS.register('panels','ghost',  {on:true,label:'幽灵',         desc:'幽灵轨
 SYS.register('panels','wb',     {on:true,label:'载重',         desc:'载重平衡 W&B:装载分布→总重/CG%MAC/配平+CG 包线(联动性能/MCDU)'});
 SYS.register('panels','proc',   {on:true,label:'程序',         desc:'SID/STAR 程序进近:多机场进场程序库,程序点并入 F-PLN + ND 显示'});
 SYS.register('panels','chart',  {on:true,label:'航图',         desc:'进近图/航图:平面进近图 + 垂直剖面(静态参考,区别于 ND)'});
+SYS.register('panels','precip', {on:true,label:'降水',         desc:'降水天气+污染跑道:雨/雪渲染+干/湿/雪 μ 摩擦(降刹车效能)'});
 
 SYS.load();
 if(typeof window!=='undefined')window.SYS=SYS;
