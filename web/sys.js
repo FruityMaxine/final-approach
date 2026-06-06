@@ -76,6 +76,7 @@ SYS.register('panels','hist',   {on:true,label:'履历',         desc:'着陆履
 SYS.register('panels','ghost',  {on:true,label:'幽灵',         desc:'幽灵轨迹对比:叠加该机场历史最佳进近线供追逐'});
 SYS.register('panels','wb',     {on:true,label:'载重',         desc:'载重平衡 W&B:装载分布→总重/CG%MAC/配平+CG 包线(联动性能/MCDU)'});
 SYS.register('panels','proc',   {on:true,label:'程序',         desc:'SID/STAR 程序进近:多机场进场程序库,程序点并入 F-PLN + ND 显示'});
+SYS.register('panels','chart',  {on:true,label:'航图',         desc:'进近图/航图:平面进近图 + 垂直剖面(静态参考,区别于 ND)'});
 
 SYS.load();
 if(typeof window!=='undefined')window.SYS=SYS;

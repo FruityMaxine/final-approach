@@ -695,3 +695,6 @@ html[data-device=phone] .syspanel{padding:8px 10px 10px;}
 .proc-clr{width:100%;font-family:var(--mono);font-size:10px;color:var(--ink-dim);background:#11151e;border:1px solid var(--edge2);border-radius:6px;padding:7px;cursor:pointer;}
 .proc-clr:hover{color:var(--ink);border-color:var(--edge3);}
 .proc-empty{font-family:var(--mono);font-size:10px;color:var(--ink-faint2);text-align:center;padding:14px;}
+
+/* 航图/CHART(静态进近图,手机零横滚) */
+.chart-cv{display:block;width:100%;max-width:360px;margin:0 auto 7px;border:1px solid var(--edge);border-radius:8px;background:#070d0a;}
