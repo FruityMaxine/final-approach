@@ -57,12 +57,14 @@
       <div class="mlight warn" id="mWarn" title="主警告 (点击消音)">WARN</div>
       <div class="mlight caut" id="mCaut" title="主警戒 (点击消音)">CAUT</div>
     </div>
-    <!-- 面板框架:选择器 tab 条 + 面板内容覆盖层(覆于世界视图上,飞行继续) -->
-    <div id="panelBar"></div>
-    <div id="panelHost"></div>
   </div>
 
+  <!-- 面板选择器:位于飞行视野与仪表台之间,飞行视野永不被盖。所有 tab 一屏可见(flex-wrap)。 -->
+  <div id="panelBar"></div>
+
   <div id="console" class="landscape">
+    <!-- 面板内容渲染进下方仪表区(覆于仪表上,通过 tab 与飞行仪表切换);飞行视野始终在上方完整可见 -->
+    <div id="panelHost"></div>
     <div class="bezel" id="n1mod">
       <div class="lbl" style="margin-bottom:5px;">N1 %</div>
       <div class="n1row">

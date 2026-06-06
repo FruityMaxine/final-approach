@@ -32,11 +32,13 @@ const PANELS={
     if(def.wire)def.wire(this.host);
     if(def.sync)def.sync(this.host);
     this.host.classList.add('show');
+    const con=document.getElementById('console'); if(con)con.classList.add('panel-open');   // 面板打开→仪表区增高给面板腾空间(飞行视野仍在上方)
     if(this.bar)this.bar.querySelectorAll('.ptab').forEach(t=>t.classList.toggle('on',t.dataset.panel===id));
   },
   close(){
     this.current=null;
     if(this.host)this.host.classList.remove('show');
+    const con=document.getElementById('console'); if(con)con.classList.remove('panel-open');
     if(this.bar)this.bar.querySelectorAll('.ptab').forEach(t=>t.classList.toggle('on',t.dataset.panel==='__flight'));
   },
   // 每帧由主循环调用:刷新当前面板读数(仅当前面板,开销小)

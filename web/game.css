@@ -53,7 +53,7 @@ html,body{width:100%;height:100%;overflow:hidden;background:var(--bg);color:var(
 #fdcross.show{opacity:1;}
 
 /* ===== 仪表台 ===== */
-#console{flex:0 0 auto;display:grid;gap:8px;padding:var(--con-pad);background:
+#console{position:relative;flex:0 0 auto;display:grid;gap:8px;padding:var(--con-pad);background:
    radial-gradient(120% 80% at 50% -20%,#1a2231,transparent 60%),
    linear-gradient(180deg,#10141d,#070a10);
    border-top:1px solid #2c3547;box-shadow:0 -8px 24px rgba(0,0,0,.5);}
@@ -268,20 +268,33 @@ html[data-device=desktop] .sysbtn .kbdhint{display:block;}
 /* 触控设备隐藏键位提示(即便误判) */
 @media (pointer:coarse){ .kbdhint{display:none !important;} }
 
+/* 面板打开时仪表区增高,给面板更多空间(飞行视野压到约 36-40vh 但始终可见、绝不被盖) */
+html[data-device=phone] #console.panel-open{ height:clamp(460px,64vh,640px); }
+html[data-device=tablet] #console.panel-open{ height:clamp(520px,62vh,760px); }
+html[data-device=desktop] #console.panel-open{ height:clamp(360px,50vh,520px); }
+
 /*==================================================================
   面板框架(PanelFramework) — 选择器 tab 条 + 面板覆盖层
 ==================================================================*/
-#panelBar{position:absolute;bottom:9px;left:50%;transform:translateX(-50%);display:flex;gap:5px;z-index:9;
-  background:rgba(6,9,15,.6);border:1px solid var(--edge);border-radius:10px;padding:4px;backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);pointer-events:auto;max-width:94%;overflow-x:auto;}
-.ptab{font-family:var(--mono);font-size:11px;letter-spacing:.06em;color:var(--ink-dim);background:linear-gradient(180deg,#1a2030,#11151e);
-  border:1px solid var(--edge);border-radius:7px;padding:6px 13px;cursor:pointer;transition:.13s;white-space:nowrap;flex:0 0 auto;}
+/* tab 选择器条:位于飞行视野与仪表台之间,flex-wrap 让 12 个 tab 一屏全可见(绝不横向滚动) */
+#panelBar{flex:0 0 auto;display:flex;flex-wrap:wrap;justify-content:center;gap:4px;z-index:9;
+  padding:5px 7px;background:#070a10;border-top:1px solid var(--edge);pointer-events:auto;}
+.ptab{font-family:var(--mono);font-size:11px;letter-spacing:.04em;color:var(--ink-dim);background:linear-gradient(180deg,#1a2030,#11151e);
+  border:1px solid var(--edge);border-radius:7px;padding:5px 11px;cursor:pointer;transition:.13s;white-space:nowrap;flex:0 0 auto;}
 .ptab:hover{color:var(--ink);border-color:var(--edge3);}
 .ptab.on{color:var(--cyan);border-color:#1d6fb0;background:linear-gradient(180deg,#0c3a52,#08222f);box-shadow:0 0 12px rgba(42,216,255,.3);}
 
-#panelHost{position:absolute;inset:0 0 44px 0;z-index:8;display:none;overflow:auto;
-  background:linear-gradient(165deg,rgba(10,14,22,.96),rgba(4,6,11,.97));backdrop-filter:blur(3px);-webkit-backdrop-filter:blur(3px);pointer-events:auto;}
+/* 面板宿主:覆盖下方仪表区(#console),飞行视野(#viewport)始终完整可见。
+   仅纵向滚动兜底(densest 面板),绝不横向滚动。*/
+#panelHost{position:absolute;inset:0;z-index:8;display:none;overflow-y:auto;overflow-x:hidden;
+  background:linear-gradient(165deg,#0a0e16,#04060b);pointer-events:auto;}
 #panelHost.show{display:block;}
-.syspanel{padding:16px 18px 54px;}
+#panelHost>*{max-width:100%;box-sizing:border-box;}
+.syspanel{padding:12px 14px 16px;}
+/* 手机:面板内容紧凑化,塞进有限仪表区高度,避免页面级滚动 */
+html[data-device=phone] .syspanel{padding:9px 11px 12px;}
+html[data-device=phone] .sp-title{font-size:11px;margin-bottom:9px;padding-bottom:6px;}
+html[data-device=phone] #panelHost{font-size:.92em;}
 .sp-title{font-family:var(--mono);font-size:13px;letter-spacing:.1em;color:var(--cyan);text-transform:uppercase;margin-bottom:14px;border-bottom:1px solid var(--edge);padding-bottom:8px;}
 .sp-hint{font-family:var(--mono);font-size:10px;color:var(--ink-faint2);margin-top:14px;line-height:1.6;}
 .eng-grid{display:grid;gap:10px;}
@@ -362,7 +375,10 @@ html[data-device=desktop] .sysbtn .kbdhint{display:block;}
 .sysctl-txt b{font-size:12px;color:var(--ink);font-weight:600;}
 .sysctl-txt span{font-size:10px;color:var(--ink-faint2);margin-top:1px;}
 /* MCDU 飞控电脑(A320 风格 CDU) */
-.mcdu{padding:12px 10px 56px;display:flex;flex-direction:column;align-items:center;gap:10px;max-width:540px;margin:0 auto;}
+.mcdu{padding:10px 10px 14px;display:flex;flex-direction:column;align-items:center;gap:8px;max-width:540px;margin:0 auto;}
+html[data-device=phone] .mcdu{gap:6px;}
+html[data-device=phone] .mcdu .mk{padding:6px 0;font-size:11px;}
+html[data-device=phone] .fcu-row{gap:6px;}
 .mcdu-unit{display:flex;align-items:stretch;gap:6px;width:100%;}
 .lsk-col{display:flex;flex-direction:column;justify-content:space-around;padding:22px 0;flex:0 0 auto;}
 .lsk{width:28px;height:15px;border-radius:3px;background:linear-gradient(180deg,#2a3242,#141a26);border:1px solid var(--edge2);cursor:pointer;display:grid;place-items:center;transition:.1s;}
