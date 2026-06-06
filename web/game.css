@@ -589,3 +589,25 @@ html[data-device=phone] .syspanel{padding:8px 10px 10px;}
 .pf-cell>b small{font-size:7px;color:var(--ink-faint2);margin-left:1px;}
 .pf-cell.ok>b{color:var(--grn);} .pf-cell.ok{border-color:var(--grn2);}
 .pf-cell.no>b{color:var(--red);} .pf-cell.no{border-color:#8a2a22;background:#1a0c0a;}
+
+/* ECL 电子检查单(高密度小行,手机零横滚) */
+.ecl-tabs{display:flex;flex-wrap:wrap;gap:4px;margin-bottom:9px;}
+.ecl-tab{flex:1 1 auto;font-family:var(--mono);font-size:9px;color:var(--ink-dim);background:linear-gradient(180deg,#1a2030,#11151e);border:1px solid var(--edge2);border-radius:6px;padding:5px 4px;cursor:pointer;transition:.1s;}
+.ecl-tab.on{color:var(--cyan);border-color:#1d6fb0;background:linear-gradient(180deg,#0c3a52,#08222f);}
+.ecl-tab.abnormal{color:#d98a82;} .ecl-tab.abnormal.on{color:var(--red);border-color:#8a2a22;background:#1a0c0a;}
+.ecl-tab.auto.on{color:var(--grn);border-color:var(--grn2);background:#0c2a1c;}
+.ecl-screen{background:#070a10;border:1px solid var(--edge);border-radius:8px;padding:9px 10px;}
+.ecl-hd{font-family:var(--mono);font-size:11px;font-weight:700;letter-spacing:.04em;color:var(--cyan);display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;}
+.ecl-hd.abnormal{color:var(--red);}
+.ecl-prog{font-size:10px;color:var(--ink-dim);}
+.ecl-bar{height:3px;border-radius:2px;background:#1a2030;overflow:hidden;margin-bottom:8px;}
+.ecl-bar>i{display:block;height:100%;background:linear-gradient(90deg,var(--cyan),var(--grn));transition:width .25s;}
+.ecl-list{display:flex;flex-direction:column;gap:3px;}
+.ecl-item{display:flex;align-items:center;gap:7px;font-family:var(--mono);font-size:11px;padding:4px 6px;border-radius:5px;border:1px solid transparent;}
+.ecl-item.man{cursor:pointer;} .ecl-item.man:hover{background:rgba(42,216,255,.05);border-color:var(--edge);}
+.ecl-box{flex:0 0 auto;width:13px;height:13px;border-radius:3px;border:1px solid var(--edge3);position:relative;}
+.ecl-item.done .ecl-box{background:var(--grn);border-color:var(--grn2);}
+.ecl-item.done .ecl-box::after{content:"";position:absolute;left:4px;top:1px;width:3px;height:7px;border:solid #07140d;border-width:0 2px 2px 0;transform:rotate(42deg);}
+.ecl-t{flex:1;min-width:0;color:var(--ink-dim);}
+.ecl-item.done .ecl-t{color:var(--grn);}
+.ecl-tag{flex:0 0 auto;font-size:7px;color:var(--ink-faint2);letter-spacing:.05em;}
