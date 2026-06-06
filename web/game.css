@@ -1,0 +1,264 @@
+/*==================================================================
+  FINAL APPROACH — 客机降落模拟  ·  样式表
+  布局策略：#console 横/竖屏 × html[data-device] 手机/平板/桌面 三屏
+==================================================================*/
+:root{
+  --bg:#05070c; --panel:#0d1119; --panel2:#141925; --panel3:#1b2230;
+  --edge:#262d3c; --edge2:#3a4458; --edge3:#4d5a72;
+  --ink:#eef2f9; --ink-dim:#8b95a8; --ink-faint:#56607450;
+  --ink-faint2:#5a6478;
+  --grn:#2ee68f; --grn2:#12b06d; --grnd:#0c2a1c;
+  --amb:#ffb02e; --ambd:#2a1c08; --red:#ff4a3d; --redd:#2a0f0c;
+  --cyan:#2ad8ff; --mag:#ff5cc8; --blu:#4d8df0;
+  --mono:'JetBrains Mono','SF Mono',ui-monospace,'DejaVu Sans Mono',Menlo,Consolas,monospace;
+  --sans:-apple-system,system-ui,'Segoe UI',Roboto,'Helvetica Neue',sans-serif;
+  --r:11px;
+  /* 设备分级可调尺度(由 data-device 覆盖) */
+  --ctl-scale:1;      /* 控件整体缩放 */
+  --con-pad:8px;      /* 仪表台内边距 */
+  --badge-fs:10.5px;  /* 角标字号 */
+  --ico:36px;         /* 顶部图标按钮 */
+}
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;-webkit-user-select:none;user-select:none;}
+html,body{width:100%;height:100%;overflow:hidden;background:var(--bg);color:var(--ink);font-family:var(--sans);touch-action:none;overscroll-behavior:none;-webkit-text-size-adjust:100%;}
+
+#app{position:fixed;inset:0;display:flex;flex-direction:column;background:#030407;}
+
+/* ===== 外景视口 + 驾驶舱框架 ===== */
+#viewport{position:relative;flex:1 1 auto;min-height:0;overflow:hidden;background:#03040a;}
+#world{display:block;width:100%;height:100%;}
+.overlay{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;}
+#cockpit{position:absolute;inset:0;pointer-events:none;z-index:5;}
+
+.topbar{position:absolute;top:0;left:0;right:0;display:flex;justify-content:space-between;align-items:flex-start;padding:11px 13px;pointer-events:none;z-index:8;}
+.tags{display:flex;flex-direction:column;gap:6px;}
+.badge{font-family:var(--mono);font-size:var(--badge-fs);letter-spacing:.13em;color:var(--ink-dim);background:rgba(6,9,15,.55);border:1px solid var(--edge);border-radius:7px;padding:5px 10px;backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);box-shadow:0 1px 3px rgba(0,0,0,.4);}
+.badge b{color:var(--grn);font-weight:600;}
+.badge.warn b{color:var(--amb);}
+.badge.dev{color:var(--cyan);} .badge.dev b{color:var(--cyan);}
+/* 飞行视野至珍:信息角标飞行中自动淡出,相位变化短暂回显;可在设置常显 */
+#infoTags{transition:opacity .6s ease;}
+#app.tags-hidden #infoTags{opacity:0;pointer-events:none;}
+.top-btns{display:flex;gap:8px;pointer-events:auto;}
+.ico-btn{width:var(--ico);height:var(--ico);display:grid;place-items:center;background:rgba(13,17,25,.72);border:1px solid var(--edge);border-radius:9px;color:var(--ink-dim);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);cursor:pointer;transition:.15s;}
+.ico-btn:hover{color:var(--ink);border-color:var(--edge3);}
+.ico-btn:active{transform:scale(.93);}
+
+#callout{position:absolute;top:40%;left:50%;transform:translate(-50%,-50%);font-family:var(--mono);font-weight:800;font-size:clamp(20px,4.6vw,44px);letter-spacing:.14em;text-align:center;pointer-events:none;opacity:0;transition:opacity .18s,transform .18s;text-shadow:0 0 22px currentColor,0 2px 4px rgba(0,0,0,.6);line-height:1.15;z-index:7;}
+#callout.show{opacity:1;}
+#callout.pop{transform:translate(-50%,-50%) scale(1.08);}
+
+/* 飞行指引(flight director) — assist 模式十字 */
+#fdcross{position:absolute;inset:0;pointer-events:none;z-index:6;opacity:0;transition:opacity .25s;}
+#fdcross.show{opacity:1;}
+
+/* ===== 仪表台 ===== */
+#console{flex:0 0 auto;display:grid;gap:8px;padding:var(--con-pad);background:
+   radial-gradient(120% 80% at 50% -20%,#1a2231,transparent 60%),
+   linear-gradient(180deg,#10141d,#070a10);
+   border-top:1px solid #2c3547;box-shadow:0 -8px 24px rgba(0,0,0,.5);}
+/* —— 横屏布局 —— */
+#console.landscape{
+  height:clamp(250px,41vh,342px);
+  grid-template-columns:72px 60px minmax(230px,2.1fr) minmax(206px,1.45fr);
+  grid-template-rows:auto 1fr 34px;
+  grid-template-areas:"n1 n1 pfd sys" "thr flap pfd stick" "rud rud rud rud";
+}
+/* —— 竖屏布局:画面在上,控制在下,绝不遮挡 —— */
+#console.portrait{
+  height:clamp(334px,49vh,476px);
+  grid-template-columns:58px 1fr 132px;
+  grid-template-rows:1fr 116px 34px;
+  grid-template-areas:"thr pfd stick" "flap sys stick" "rud rud rud";
+}
+#console.portrait #n1mod{display:none;}
+#rudmod{grid-area:rud;}
+
+#n1mod{grid-area:n1;} #thrmod{grid-area:thr;} #flapmod{grid-area:flap;}
+#pfdmod{grid-area:pfd;} #sysmod{grid-area:sys;} #stickmod{grid-area:stick;}
+
+.bezel{background:linear-gradient(160deg,#1c2333,#0b0e16);border:1px solid var(--edge);border-radius:var(--r);
+   box-shadow:inset 0 1px 0 rgba(255,255,255,.05),inset 0 0 26px rgba(0,0,0,.6),0 2px 7px rgba(0,0,0,.45);
+   position:relative;min-width:0;min-height:0;display:flex;flex-direction:column;}
+.bezel::before{content:"";position:absolute;inset:0;border-radius:var(--r);pointer-events:none;
+   background:linear-gradient(160deg,rgba(255,255,255,.03),transparent 40%);}
+.lbl{font-family:var(--mono);font-size:9px;letter-spacing:.17em;color:var(--ink-faint2);text-transform:uppercase;}
+
+/* N1 */
+#n1mod{padding:7px 9px 8px;}
+.n1row{display:flex;gap:8px;align-items:flex-end;flex:1;}
+.n1unit{flex:1;text-align:center;display:flex;flex-direction:column;}
+.n1bar{flex:1;min-height:30px;border-radius:5px;background:#080c12;border:1px solid var(--edge);position:relative;overflow:hidden;margin-bottom:4px;}
+.n1fill{position:absolute;left:0;right:0;bottom:0;background:linear-gradient(180deg,var(--grn),var(--grn2));transition:height .07s linear;box-shadow:0 0 12px rgba(46,230,143,.4);}
+.n1fill.rev{background:linear-gradient(180deg,var(--amb),#c98a14);box-shadow:0 0 12px rgba(255,176,46,.4);}
+.n1redline{position:absolute;left:0;right:0;top:8%;height:1px;background:var(--red);opacity:.6;}
+.n1num{font-family:var(--mono);font-size:13px;font-weight:600;color:var(--grn);}
+.n1tag{font-family:var(--mono);font-size:8px;color:var(--ink-faint2);}
+
+/* 油门 */
+#thrmod{padding:7px 6px 8px;align-items:center;}
+.thr-n1{font-family:var(--mono);font-size:10px;font-weight:600;color:var(--grn);margin-bottom:3px;}
+.thr-track{flex:1;width:100%;max-width:46px;margin:5px 0 4px;background:linear-gradient(180deg,#04060a,#0e131c);border:1px solid var(--edge);border-radius:9px;position:relative;cursor:grab;overflow:hidden;touch-action:none;}
+.thr-track:active{cursor:grabbing;}
+.thr-fill{position:absolute;left:0;right:0;bottom:0;background:linear-gradient(180deg,rgba(46,230,143,.28),rgba(46,230,143,.05));}
+.thr-detent{position:absolute;left:0;right:0;height:1px;background:var(--edge2);}
+.thr-grip{position:absolute;left:-2px;right:-2px;height:26px;background:linear-gradient(180deg,#3d4a62,#1d2433);border:1px solid #525e76;border-radius:7px;box-shadow:0 3px 7px rgba(0,0,0,.65),inset 0 1px 0 rgba(255,255,255,.15);transform:translateY(50%);}
+.thr-grip::after{content:"";position:absolute;left:6px;right:6px;top:50%;height:1px;background:rgba(255,255,255,.18);box-shadow:0 -3px 0 rgba(255,255,255,.1),0 3px 0 rgba(255,255,255,.1);}
+.thr-pct{font-family:var(--mono);font-size:10px;color:var(--grn);}
+
+/* 襟翼 */
+#flapmod{padding:7px 5px 8px;align-items:center;}
+.flap-track{flex:1;width:100%;margin-top:5px;background:#080c12;border:1px solid var(--edge);border-radius:9px;display:flex;flex-direction:column;justify-content:space-between;padding:6px 0;position:relative;}
+.flap-stop{flex:1;display:flex;align-items:center;justify-content:center;font-family:var(--mono);font-size:9.5px;color:var(--ink-faint2);position:relative;z-index:2;cursor:pointer;transition:.1s;}
+.flap-stop.on{color:var(--grn);font-weight:700;text-shadow:0 0 8px rgba(46,230,143,.5);}
+.flap-knob{position:absolute;left:3px;right:3px;height:17%;background:linear-gradient(180deg,#3d4a62,#1d2433);border:1px solid #525e76;border-radius:5px;z-index:1;transition:top .2s cubic-bezier(.34,1.3,.5,1);box-shadow:0 2px 5px rgba(0,0,0,.55);}
+
+/* PFD */
+#pfdmod{padding:0;overflow:hidden;}
+#pfd{display:block;width:100%;height:100%;}
+
+/* 系统按钮 */
+#sysmod{padding:7px;display:grid;grid-template-columns:repeat(3,1fr);gap:6px;}
+#console.portrait #sysmod{grid-template-columns:repeat(3,1fr);}
+.sysbtn.emma{border-color:#1d6fb0;background:linear-gradient(180deg,#10283f,#0a1622);}
+.sysbtn.emma .nm{color:var(--cyan);} .sysbtn.emma .led{background:#1a3550;box-shadow:inset 0 0 3px #000;}
+.sysbtn.emma.on{border-color:#2ad8ff;background:linear-gradient(180deg,#0c3a52,#08222f);box-shadow:0 0 16px rgba(42,216,255,.4);}
+.sysbtn.emma.on .led{background:var(--cyan);box-shadow:0 0 11px var(--cyan);}
+.sysbtn.emma.on .nm,.sysbtn.emma.on .st{color:var(--cyan);}
+/* EMMA 辅助(assist)档:琥珀色脉冲 */
+.sysbtn.emma.assist{border-color:#7d6a1f;background:linear-gradient(180deg,#2a2208,#171005);box-shadow:0 0 14px rgba(255,176,46,.35);}
+.sysbtn.emma.assist .led{background:var(--amb);box-shadow:0 0 10px var(--amb);}
+.sysbtn.emma.assist .nm,.sysbtn.emma.assist .st{color:var(--amb);}
+#rudmod{padding:5px 10px;flex-direction:row;align-items:center;gap:9px;}
+.rud-cap{font-family:var(--mono);font-size:9px;letter-spacing:.08em;color:var(--ink-faint2);flex:0 0 auto;}
+.rud-track{flex:1;height:20px;border-radius:11px;background:linear-gradient(90deg,#0e131c,#04060a,#0e131c);border:1px solid var(--edge);position:relative;cursor:grab;overflow:hidden;touch-action:none;}
+.rud-track:active{cursor:grabbing;}
+.rud-fill{position:absolute;top:0;bottom:0;background:rgba(42,216,255,.22);}
+.rud-center{position:absolute;left:50%;top:2px;bottom:2px;width:1px;background:var(--edge2);transform:translateX(-50%);}
+.rud-knob{position:absolute;top:-3px;width:24px;height:26px;left:50%;margin-left:-12px;border-radius:7px;background:linear-gradient(180deg,#3d4a62,#1d2433);border:1px solid #5e6c88;box-shadow:0 2px 6px rgba(0,0,0,.6),inset 0 1px 0 rgba(255,255,255,.15);transition:transform .03s linear;}
+.rud-knob::after{content:"";position:absolute;left:50%;top:5px;bottom:5px;width:1px;background:rgba(255,255,255,.25);}
+.sysbtn{border-radius:10px;background:linear-gradient(180deg,#212a3b,#11151e);border:1px solid var(--edge);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;cursor:pointer;transition:.12s;position:relative;overflow:hidden;min-height:42px;}
+.sysbtn:active{transform:scale(.95);}
+.sysbtn .led{width:7px;height:7px;border-radius:50%;background:#2a3142;box-shadow:inset 0 0 3px #000;transition:.15s;}
+.sysbtn .nm{font-family:var(--mono);font-size:8.5px;letter-spacing:.05em;color:var(--ink-dim);line-height:1;}
+.sysbtn .st{font-family:var(--mono);font-size:7.5px;color:var(--ink-faint2);line-height:1;}
+.sysbtn.on{border-color:var(--grn2);background:linear-gradient(180deg,#14331f,#0a1c13);}
+.sysbtn.on .led{background:var(--grn);box-shadow:0 0 9px var(--grn);}
+.sysbtn.on .nm,.sysbtn.on .st{color:var(--grn);}
+.sysbtn.armed{border-color:#7d6a1f;background:linear-gradient(180deg,#2a2208,#171005);}
+.sysbtn.armed .led{background:var(--amb);box-shadow:0 0 9px var(--amb);}
+.sysbtn.armed .nm,.sysbtn.armed .st{color:var(--amb);}
+.sysbtn.warn{border-color:#8a2a22;background:linear-gradient(180deg,#2c1310,#180a09);}
+.sysbtn.warn .led{background:var(--red);box-shadow:0 0 10px var(--red);}
+.sysbtn.warn .nm,.sysbtn.warn .st{color:var(--red);}
+.sysbtn.toga{border-color:#1d6fb0;}
+.sysbtn.toga .nm{color:var(--cyan);}
+.sysbtn.toga .led{background:var(--cyan);box-shadow:0 0 8px var(--cyan);}
+.sysbtn.disabled{opacity:.35;pointer-events:none;}
+
+/* 摇杆 */
+#stickmod{padding:7px;}
+.stick-hdr{display:flex;justify-content:space-between;align-items:center;margin-bottom:5px;}
+#stickpad{flex:1 1 auto;border-radius:12px;background:radial-gradient(circle at 50% 45%,#161d2b,#090c13 75%);border:1px solid var(--edge);position:relative;overflow:hidden;cursor:grab;touch-action:none;min-height:0;}
+#stickpad:active{cursor:grabbing;}
+#stickpad .ring{position:absolute;border:1px solid #1a2230;border-radius:50%;left:50%;top:50%;transform:translate(-50%,-50%);}
+#stickknob{position:absolute;width:48px;height:48px;left:50%;top:50%;margin:-24px;border-radius:50%;
+   background:radial-gradient(circle at 36% 30%,#56627e,#2a3344 62%,#171d29);
+   border:1px solid #5e6c88;box-shadow:0 4px 11px rgba(0,0,0,.65),inset 0 2px 4px rgba(255,255,255,.16),inset 0 -4px 7px rgba(0,0,0,.55);
+   transition:transform .035s linear;z-index:3;}
+#stickknob::after{content:"";position:absolute;inset:15px;border-radius:50%;border:1px solid #66748e;opacity:.5;}
+#stickknob::before{content:"";position:absolute;inset:6px;border-radius:50%;background:radial-gradient(circle at 38% 32%,rgba(255,255,255,.12),transparent 55%);}
+
+/* ===== 弹层:启动 / 讲评 / 帮助 / 配置 ===== */
+.modal{position:fixed;inset:0;z-index:600;display:none;align-items:center;justify-content:center;padding:20px;
+   background:rgba(3,5,9,.74);backdrop-filter:blur(9px);-webkit-backdrop-filter:blur(9px);}
+.modal.show{display:flex;}
+.card{width:min(560px,94vw);max-height:92vh;overflow:auto;background:linear-gradient(168deg,#161d2a,#0a0d15);
+   border:1px solid var(--edge3);border-radius:18px;padding:26px 28px;box-shadow:0 28px 80px rgba(0,0,0,.72),inset 0 1px 0 rgba(255,255,255,.05);}
+.card::-webkit-scrollbar{width:8px;} .card::-webkit-scrollbar-thumb{background:var(--edge2);border-radius:4px;}
+
+.splash-logo{font-family:var(--mono);font-size:12px;letter-spacing:.34em;color:var(--grn);text-align:center;margin-bottom:6px;}
+.splash-title{font-size:30px;font-weight:800;letter-spacing:.04em;text-align:center;line-height:1.1;}
+.splash-sub{color:var(--ink-dim);font-size:13.5px;line-height:1.7;text-align:center;margin:12px auto 0;max-width:430px;}
+.brief{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin:20px 0;}
+.brief .bx{background:#0b0f17;border:1px solid var(--edge);border-radius:10px;padding:11px 13px;}
+.brief .bk{font-family:var(--mono);font-size:9px;letter-spacing:.12em;color:var(--ink-faint2);text-transform:uppercase;}
+.brief .bv{font-family:var(--mono);font-size:18px;font-weight:700;margin-top:3px;color:var(--ink);}
+.brief .bn{font-size:11px;color:var(--ink-dim);margin-top:2px;}
+
+.grade{font-family:var(--mono);font-size:66px;font-weight:800;line-height:1;letter-spacing:.02em;text-shadow:0 0 30px currentColor;}
+.verdict{font-size:18px;font-weight:700;margin:1px 0 5px;}
+.rsub{color:var(--ink-dim);font-size:13px;line-height:1.65;}
+.metrics{margin:18px 0;display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+.metric{background:#0b0f17;border:1px solid var(--edge);border-radius:10px;padding:11px 13px;}
+.metric .mk{font-family:var(--mono);font-size:9px;letter-spacing:.1em;color:var(--ink-faint2);text-transform:uppercase;}
+.metric .mv{font-family:var(--mono);font-size:21px;font-weight:700;margin-top:3px;}
+.metric .mn{font-size:11px;color:var(--ink-dim);margin-top:2px;}
+.notes{background:#0b0f17;border:1px solid var(--edge);border-radius:10px;padding:14px 16px 14px 20px;font-size:13px;line-height:1.75;color:var(--ink);list-style:disc;}
+.notes li{margin-left:6px;margin-bottom:6px;}
+.notes li::marker{color:var(--ink-faint2);}
+.notes .good{color:var(--grn);} .notes .bad{color:var(--amb);} .notes .crit{color:var(--red);}
+
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;padding:13px 24px;border-radius:11px;border:1px solid var(--edge3);
+   background:linear-gradient(180deg,#242f42,#161d29);color:var(--ink);font-size:15px;font-weight:600;cursor:pointer;transition:.15s;font-family:var(--sans);}
+.btn:hover{border-color:var(--grn2);transform:translateY(-1px);} .btn:active{transform:scale(.97);}
+.btn.primary{background:linear-gradient(180deg,#199a5e,#0f7245);border-color:#2ee68f;box-shadow:0 6px 18px rgba(46,230,143,.22);}
+.btn.big{width:100%;padding:15px;font-size:16px;margin-top:4px;}
+.btn.ghost{background:linear-gradient(180deg,#1a2030,#11151e);}
+
+.help-card h3{font-size:12.5px;color:var(--grn);font-family:var(--mono);letter-spacing:.09em;margin:18px 0 8px;text-transform:uppercase;}
+.help-card h2{font-size:21px;margin-bottom:4px;}
+.help-card p,.help-card li{font-size:13.5px;line-height:1.75;color:var(--ink);}
+.help-card ul{list-style:disc;padding-left:20px;} .help-card li{margin-bottom:4px;}
+.help-card .dim{color:var(--ink-dim);}
+.kbd{font-family:var(--mono);font-size:11px;background:#0b0f17;border:1px solid var(--edge2);border-radius:5px;padding:2px 6px;color:var(--cyan);}
+.toggle-row{display:flex;align-items:center;justify-content:space-between;gap:14px;padding:12px 0;border-bottom:1px solid var(--edge);}
+.toggle-row:last-child{border-bottom:none;}
+.sw{width:48px;height:27px;border-radius:14px;background:#1a2030;border:1px solid var(--edge2);position:relative;cursor:pointer;transition:.2s;flex:0 0 auto;}
+.sw::after{content:"";position:absolute;width:21px;height:21px;border-radius:50%;background:#5a6478;top:2px;left:2px;transition:.2s;}
+.sw.on{background:#0f7245;border-color:#2ee68f;}
+.sw.on::after{left:23px;background:var(--grn);}
+.foot{display:flex;justify-content:flex-end;gap:10px;margin-top:20px;}
+
+/* 难度/起始/设备分段选择器(配置面板用,Tick5 扩展) */
+.seg{display:flex;gap:6px;margin-top:8px;}
+.seg-opt{flex:1;padding:10px 6px;border-radius:9px;border:1px solid var(--edge2);background:#0b0f17;color:var(--ink-dim);font-family:var(--mono);font-size:11px;text-align:center;cursor:pointer;transition:.13s;}
+.seg-opt.on{border-color:var(--grn);color:var(--grn);background:#0c2a1c;box-shadow:0 0 10px rgba(46,230,143,.2);}
+.seg-opt .sub{display:block;font-size:8.5px;color:var(--ink-faint2);margin-top:2px;}
+.seg-opt.on .sub{color:var(--grn2);}
+.cfg-grp{margin:14px 0;}
+.cfg-grp>.lbl{display:block;margin-bottom:4px;}
+.rng{flex:1;-webkit-appearance:none;appearance:none;height:5px;border-radius:3px;background:#1a2030;outline:none;}
+.rng::-webkit-slider-thumb{-webkit-appearance:none;appearance:none;width:18px;height:18px;border-radius:50%;background:var(--grn);border:2px solid #0a1c13;box-shadow:0 1px 4px rgba(0,0,0,.5);cursor:pointer;}
+.rng::-moz-range-thumb{width:18px;height:18px;border-radius:50%;background:var(--grn);border:2px solid #0a1c13;cursor:pointer;}
+
+/*==================================================================
+  设备分级三屏  ·  html[data-device=phone|tablet|desktop]
+  与 #console.portrait/.landscape 正交叠加
+==================================================================*/
+/* —— 手机:紧凑单手,控件略小,角标更小,适合竖握 —— */
+html[data-device=phone]{ --ctl-scale:.94; --con-pad:6px; --badge-fs:9.5px; --ico:34px; }
+html[data-device=phone] #console.portrait{ height:clamp(310px,52vh,460px); }
+html[data-device=phone] .sysbtn .nm{font-size:8px;}
+html[data-device=phone] .topbar{padding:8px 9px;}
+html[data-device=phone] .tags{gap:4px;}
+
+/* —— 平板(iPad):大控件双手把持,仪表台更高,字号放大,触控目标更大 —— */
+html[data-device=tablet]{ --ctl-scale:1.12; --con-pad:12px; --badge-fs:12px; --ico:42px; }
+html[data-device=tablet] #console{gap:11px;}
+html[data-device=tablet] #console.landscape{ height:clamp(300px,44vh,420px); grid-template-columns:88px 72px minmax(280px,2.2fr) minmax(240px,1.5fr); }
+html[data-device=tablet] #console.portrait{ height:clamp(380px,46vh,560px); grid-template-columns:72px 1fr 168px; grid-template-rows:1fr 150px 42px; }
+html[data-device=tablet] .sysbtn{min-height:52px;} html[data-device=tablet] .sysbtn .nm{font-size:10px;}
+html[data-device=tablet] #stickknob{width:58px;height:58px;margin:-29px;}
+html[data-device=tablet] .rud-track{height:26px;} html[data-device=tablet] .rud-knob{height:32px;top:-4px;}
+html[data-device=tablet] .thr-track{max-width:56px;}
+
+/* —— 桌面:键鼠为主,宽仪表台,显示键位提示,控件不必巨大 —— */
+html[data-device=desktop]{ --ctl-scale:1; --con-pad:10px; --badge-fs:11px; --ico:38px; }
+html[data-device=desktop] #console.landscape{ height:clamp(230px,34vh,310px); grid-template-columns:80px 64px minmax(300px,2.4fr) minmax(230px,1.4fr); }
+html[data-device=desktop] .kbdhint{display:inline;}
+.kbdhint{display:none;font-family:var(--mono);font-size:8px;color:var(--ink-faint2);letter-spacing:.05em;margin-top:2px;}
+html[data-device=desktop] .sysbtn .kbdhint{display:block;}
+
+/* 触控设备隐藏键位提示(即便误判) */
+@media (pointer:coarse){ .kbdhint{display:none !important;} }

@@ -1,0 +1,37 @@
+{
+  "id": "final-approach",
+  "name": "FINAL APPROACH 客机降落",
+  "description": "第一视角客机进近着陆模拟 · 类 737 飞行物理 + PFD 六表 + ILS/PAPI + EMMA AI 副驾 · 手机/iPad/电脑三屏自适应 · 全屏直跳",
+  "type": "external",
+  "launch": "link",
+  "entry": "/games/final-approach/index.html",
+  "multiplayer": false,
+  "save": true,
+  "modules": {
+    "styles": [
+      "game.css"
+    ],
+    "scripts": [
+      "sys.js",
+      "config.js",
+      "render.js",
+      "emma.js",
+      "game.js"
+    ]
+  },
+  "tags": [
+    "模拟",
+    "硬核",
+    "飞行",
+    "单机"
+  ],
+  "version": "0.6.0.0",
+  "rules": [
+    "操纵摇杆/油门/襟翼/脚舵,沿 3° 下滑道对准 27 号跑道",
+    "保持下滑道(PAPI 两白两红)、对准中线、速度锁 Vref 140kt",
+    "入口柔和拉平,接地后反推+刹车停住,下降率越小评分越高",
+    "EMMA AI 副驾:分轴接管,手动单轴她续飞其余轴",
+    "落地评分自动上排行榜,支持手机/iPad/电脑三屏"
+  ],
+  "cover": "cover.svg"
+}

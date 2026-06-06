@@ -1,0 +1,22 @@
+# 依赖与构建
+node_modules/
+dist/
+*.log
+
+# 系统/编辑器
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+
+# 临时
+/tmp/
+*.tmp
+*.bak
+
+# 任何潜在密钥(防误提交)
+*.secret
+.env
+.env.*
+*.pem
+*.key

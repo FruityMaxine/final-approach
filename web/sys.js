@@ -1,0 +1,53 @@
+"use strict";
+//==================================================================
+// SYS — 中央系统开关注册表  ·  "一切皆可开关" 之基石
+//   四类:features(功能) / failures(故障) / env(环境) / panels(面板框架槽位)
+//   每项 {on, label, desc}。register/get/set/toggle/list + localStorage 持久化。
+//   后续每个功能/故障/面板都在此登记一项,FA组15 建总控面板统一开关。
+//   本文件最先加载(置 config.js 之前),纯自含,不依赖其他模块。
+//==================================================================
+const SYS={
+  features:{}, failures:{}, env:{}, panels:{},
+  _key:'fa.sys', _cats:['features','failures','env','panels'],
+  // 登记一项开关(已存在则不覆盖,保留持久化值)
+  register(cat,id,def){
+    if(!this[cat])this[cat]={};
+    if(!(id in this[cat]))this[cat][id]={on:!!(def&&def.on),label:(def&&def.label)||id,desc:(def&&def.desc)||''};
+    return this[cat][id];
+  },
+  get(cat,id){ return !!(this[cat]&&this[cat][id]&&this[cat][id].on); },
+  set(cat,id,on){ if(this[cat]&&this[cat][id]){this[cat][id].on=!!on;this.save();} return this.get(cat,id); },
+  toggle(cat,id){ if(this[cat]&&this[cat][id]){this[cat][id].on=!this[cat][id].on;this.save();} return this.get(cat,id); },
+  list(cat){ return Object.keys(this[cat]||{}).map(id=>Object.assign({id},this[cat][id])); },
+  // 仅持久化 on 值(label/desc 由代码登记,避免旧缓存固化文案)
+  save(){ try{const o={};for(const c of this._cats){o[c]={};for(const id in this[c])o[c][id]=this[c][id].on;}localStorage.setItem(this._key,JSON.stringify(o));}catch(_){} },
+  load(){ try{const o=JSON.parse(localStorage.getItem(this._key)||'null');if(o)for(const c of this._cats)if(o[c])for(const id in o[c])if(this[c]&&this[c][id])this[c][id].on=!!o[c][id];}catch(_){} },
+};
+
+// —— 默认登记:组10 已实现的功能(成为可开关项) ——
+SYS.register('features','turbulence',{on:true, label:'颠簸 / 阵风', desc:'大气湍流扰动'});
+SYS.register('features','freeFlight',{on:false,label:'自由飞模式', desc:'轻微失误不强制结束,反复练习'});
+SYS.register('features','cleanHud',  {on:true, label:'精简飞行视野',desc:'飞行中自动隐藏信息角标'});
+SYS.register('features','emmaAssist',{on:true, label:'EMMA AI 副驾',desc:'分轴接管 / 辅助驾驶'});
+SYS.register('features','sound',     {on:true, label:'声音',       desc:'发动机 / 风噪 / 语音回报'});
+
+// —— 环境(随难度/天气) ——
+SYS.register('env','windShear',{on:false,label:'风切变',     desc:'低空顶风骤变(硬核档自动开)'});
+SYS.register('env','gusts',    {on:true, label:'阵风',       desc:'随机阵风'});
+
+// —— 故障槽位(FA组12 落地连锁逻辑,先登记可触发开关) ——
+SYS.register('failures','engineFail',{on:false,label:'发动机失效',desc:'手动触发引擎停车(组12)'});
+SYS.register('failures','engineFire',{on:false,label:'发动机起火',desc:'(组12)'});
+SYS.register('failures','hydFail',   {on:false,label:'液压故障',  desc:'操纵沉重 / 扰流板失效(组12)'});
+SYS.register('failures','elecFail',  {on:false,label:'电气故障',  desc:'仪表 / 灯光失效(组12)'});
+SYS.register('failures','fuelLeak',  {on:false,label:'燃油泄漏',  desc:'(组12)'});
+SYS.register('failures','tireBurst', {on:false,label:'爆胎',     desc:'接地爆胎(组12)'});
+
+// —— 面板框架注册表(FA组11 Tick4 起注册真实面板;此处先占位声明) ——
+// 面板框架:每个驾驶舱面板在此登记一项,注册即可被面板选择器切换 → 支持数十种面板
+SYS.register('panels','flight',{on:true,label:'飞行面板',      desc:'主飞行操纵 + PFD'});
+SYS.register('panels','engine',{on:true,label:'引擎 / 系统面板',desc:'多发控制 / 点火 / 燃油(组11 Tick4-5)'});
+SYS.register('panels','mcdu',  {on:true,label:'MCDU 飞控电脑',  desc:'屏幕四周 LSK + 键盘多页 CDU(旗舰件,组12-13)'});
+
+SYS.load();
+if(typeof window!=='undefined')window.SYS=SYS;

@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<title>FINAL APPROACH · 客机降落模拟</title>
+<link rel="stylesheet" href="game.css">
+</head>
+<body>
+<div id="app">
+  <div id="viewport">
+    <canvas id="world"></canvas>
+    <svg class="overlay" id="hudsvg" viewBox="0 0 1000 600" preserveAspectRatio="none"></svg>
+    <!-- 飞行指引十字(EMMA assist 模式) -->
+    <svg id="fdcross" viewBox="0 0 1000 600" preserveAspectRatio="none"></svg>
+    <!-- 驾驶舱风挡框架 -->
+    <svg id="cockpit" viewBox="0 0 1000 600" preserveAspectRatio="none">
+      <defs>
+        <linearGradient id="glare" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0" stop-color="#05070c" stop-opacity="1"/>
+          <stop offset="0.6" stop-color="#0a0e16" stop-opacity="0.96"/>
+          <stop offset="1" stop-color="#10151f" stop-opacity="0"/>
+        </linearGradient>
+        <linearGradient id="pillar" x1="0" y1="0" x2="1" y2="0">
+          <stop offset="0" stop-color="#161b26"/><stop offset="0.5" stop-color="#0c1018"/><stop offset="1" stop-color="#1d2330"/>
+        </linearGradient>
+      </defs>
+      <path d="M0,0 H1000 V58 Q820,92 500,96 Q180,92 0,58 Z" fill="url(#glare)"/>
+      <path d="M0,58 Q180,92 500,96 Q820,92 1000,58" fill="none" stroke="#2a3344" stroke-width="1.5" opacity="0.7"/>
+      <path d="M0,0 V600 H44 Q30,300 58,96 Q24,70 0,58 Z" fill="url(#pillar)"/>
+      <path d="M1000,0 V600 H956 Q970,300 942,96 Q976,70 1000,58 Z" fill="url(#pillar)"/>
+      <line x1="58" y1="96" x2="44" y2="600" stroke="#39455c" stroke-width="1.4" opacity="0.6"/>
+      <line x1="942" y1="96" x2="956" y2="600" stroke="#39455c" stroke-width="1.4" opacity="0.6"/>
+    </svg>
+    <div class="topbar">
+      <div class="tags" id="infoTags">
+        <div class="badge">APPR · RWY <b>27</b> · ILS 110.30</div>
+        <div class="badge" id="phaseBadge">阶段 <b id="phasetxt">进近</b></div>
+        <div class="badge warn" id="windBadge">风 <b>280/08</b> 阵风</div>
+      </div>
+      <div class="top-btns">
+        <div class="ico-btn" id="btnSound" title="声音">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M5 9v6h4l5 4V5L9 9H5z"/><path d="M17 8a5 5 0 0 1 0 8" id="sndWave"/></svg>
+        </div>
+        <div class="ico-btn" id="btnHelp" title="帮助/设置">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><circle cx="12" cy="12" r="9"/><path d="M9.5 9a2.5 2.5 0 1 1 3.5 2.3c-.8.4-1 .9-1 1.7"/><circle cx="12" cy="16.5" r=".6" fill="currentColor"/></svg>
+        </div>
+        <div class="ico-btn" id="btnReset" title="重新进近">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M4 12a8 8 0 1 1 2.3 5.6"/><path d="M4 19v-4h4"/></svg>
+        </div>
+      </div>
+    </div>
+    <div id="callout"></div>
+  </div>
+
+  <div id="console" class="landscape">
+    <div class="bezel" id="n1mod">
+      <div class="lbl" style="margin-bottom:5px;">N1 %</div>
+      <div class="n1row">
+        <div class="n1unit"><div class="n1bar"><div class="n1redline"></div><div class="n1fill" id="n1fillL"></div></div><div class="n1num" id="n1numL">25</div><div class="n1tag">ENG 1</div></div>
+        <div class="n1unit"><div class="n1bar"><div class="n1redline"></div><div class="n1fill" id="n1fillR"></div></div><div class="n1num" id="n1numR">25</div><div class="n1tag">ENG 2</div></div>
+      </div>
+    </div>
+
+    <div class="bezel" id="thrmod">
+      <div class="lbl">推力</div>
+      <div class="thr-n1" id="thrN1">25%</div>
+      <div class="thr-track" id="thrTrack">
+        <div class="thr-fill" id="thrFill" style="height:20%;"></div>
+        <div class="thr-detent" style="bottom:20%;"></div>
+        <div class="thr-grip" id="thrGrip" style="bottom:20%;"></div>
+      </div>
+      <div class="thr-pct" id="thrPct">20</div>
+      <div class="kbdhint">Shift/Ctrl</div>
+    </div>
+
+    <div class="bezel" id="flapmod">
+      <div class="lbl">FLAP</div>
+      <div class="flap-track" id="flapTrack">
+        <div class="flap-knob" id="flapKnob" style="top:41%;"></div>
+        <div class="flap-stop" data-f="0">UP</div>
+        <div class="flap-stop" data-f="1">1</div>
+        <div class="flap-stop on" data-f="2">2</div>
+        <div class="flap-stop" data-f="3">3</div>
+        <div class="flap-stop" data-f="4">FL</div>
+      </div>
+      <div class="kbdhint">F/V</div>
+    </div>
+
+    <div class="bezel" id="pfdmod"><canvas id="pfd"></canvas></div>
+
+    <div class="bezel" id="sysmod">
+      <div class="sysbtn on" id="btnGear"><span class="led"></span><span class="nm">GEAR</span><span class="st" id="gearState">DN</span><span class="kbdhint">G</span></div>
+      <div class="sysbtn armed" id="btnSplr"><span class="led"></span><span class="nm">SPLR</span><span class="st" id="splrState">ARM</span><span class="kbdhint">B</span></div>
+      <div class="sysbtn" id="btnRev"><span class="led"></span><span class="nm">REV</span><span class="st">IDLE</span><span class="kbdhint">空格</span></div>
+      <div class="sysbtn" id="btnBrake"><span class="led"></span><span class="nm">BRK</span><span class="st">HOLD</span><span class="kbdhint">空格</span></div>
+      <div class="sysbtn toga" id="btnToga"><span class="led"></span><span class="nm">TO/GA</span><span class="st">复飞</span><span class="kbdhint">Enter</span></div>
+      <div class="sysbtn emma" id="btnEmma"><span class="led"></span><span class="nm">EMMA</span><span class="st" id="emmaSt">OFF</span><span class="kbdhint">E</span></div>
+    </div>
+
+    <div class="bezel" id="stickmod">
+      <div class="stick-hdr"><span class="lbl">PITCH / ROLL</span><span class="lbl" id="stickReadout" style="color:var(--ink-dim);">0 / 0</span></div>
+      <div id="stickpad">
+        <div class="ring" style="width:62%;height:62%;"></div>
+        <div class="ring" style="width:30%;height:30%;"></div>
+        <div id="stickknob"></div>
+      </div>
+    </div>
+
+    <div class="bezel" id="rudmod">
+      <span class="rud-cap">◀ 左舵 RUD</span>
+      <div class="rud-track" id="rudTrack">
+        <div class="rud-fill" id="rudFill"></div>
+        <div class="rud-center"></div>
+        <div class="rud-knob" id="rudKnob"></div>
+      </div>
+      <span class="rud-cap">RUD 右舵 ▶</span>
+    </div>
+  </div>
+</div>
+
+<!-- 启动简报 -->
+<div class="modal show" id="splash"><div class="card">
+  <div class="splash-logo">FINAL&nbsp;APPROACH</div>
+  <div class="splash-title">客机降落模拟</div>
+  <div class="splash-sub">你坐在一架窄体客机的左座,飞机已建立在 <b style="color:var(--ink)">3° 下滑道</b>上,对准 27 号跑道。把它平稳地降下来——对准中线、保持下滑道、在跑道入口柔和拉平,然后用反推和刹车停住。</div>
+  <div class="brief">
+    <div class="bx"><div class="bk">距接地</div><div class="bv">2.5 NM</div><div class="bn">约 800 ft AGL</div></div>
+    <div class="bx"><div class="bk">进近速度 Vref</div><div class="bv">140 kt</div><div class="bn">襟翼 2 / 起落架放下</div></div>
+    <div class="bx"><div class="bk">目标下降率</div><div class="bv">700 fpm</div><div class="bn">接地时收到 &lt;300</div></div>
+    <div class="bx"><div class="bk">风</div><div class="bv" id="briefWind">280/08</div><div class="bn">顶风+右侧风,阵风</div></div>
+  </div>
+  <button class="btn primary big" id="startBtn">▸ 开始进近</button>
+  <div style="display:flex;gap:10px;justify-content:center;margin-top:12px;flex-wrap:wrap;">
+    <span class="badge" id="cfgHint" style="cursor:pointer;pointer-events:auto;">飞行设置 (难度/起始/天气) &nbsp;›</span>
+    <span class="badge" id="helpHint" style="cursor:pointer;pointer-events:auto;">操作手册 &nbsp;›</span>
+  </div>
+</div></div>
+
+<!-- 飞行设置:难度 / 起始 / 天气 / 自由飞 -->
+<div class="modal" id="config"><div class="card">
+  <h2 style="font-size:21px;margin-bottom:4px;">飞行设置</h2>
+  <p class="dim" style="font-size:13px;line-height:1.6;margin-bottom:8px;">配置难度、起始位置、风与时段。设置自动保存,下次进入沿用。</p>
+  <div class="cfg-grp"><span class="lbl">难度</span>
+    <div class="seg">
+      <div class="seg-opt" data-diff="rookie">新手<span class="sub">稳风·宽容·辅助</span></div>
+      <div class="seg-opt on" data-diff="real">真实<span class="sub">标准进近</span></div>
+      <div class="seg-opt" data-diff="hard">硬核<span class="sub">阵风切变·窄容差</span></div>
+    </div>
+  </div>
+  <div class="cfg-grp"><span class="lbl">起始位置</span>
+    <div class="seg">
+      <div class="seg-opt on" data-start="short">短五边<span class="sub">2.5 NM</span></div>
+      <div class="seg-opt" data-start="long">长五边<span class="sub">5 NM</span></div>
+      <div class="seg-opt" data-start="cruise">高位切入<span class="sub">7.8 NM</span></div>
+    </div>
+  </div>
+  <div class="cfg-grp"><span class="lbl">风 &nbsp;<span id="cfgWindVal" style="color:var(--amb);">280° / 8 kt</span></span>
+    <div style="display:flex;align-items:center;gap:10px;margin-top:6px;"><span class="lbl" style="width:42px;">风速</span><input type="range" id="cfgWindSpeed" class="rng" min="0" max="35" value="8"></div>
+    <div style="display:flex;align-items:center;gap:10px;margin-top:8px;"><span class="lbl" style="width:42px;">风向</span><input type="range" id="cfgWindDir" class="rng" min="180" max="360" value="280"></div>
+  </div>
+  <div class="cfg-grp"><span class="lbl">时段</span>
+    <div class="seg">
+      <div class="seg-opt on" data-tod="dusk">黄昏</div>
+      <div class="seg-opt" data-tod="noon">正午</div>
+      <div class="seg-opt" data-tod="night">夜间</div>
+    </div>
+  </div>
+  <div class="toggle-row"><div><b>自由飞模式</b><div class="dim" style="font-size:12px;">飞过头/轻微偏出不强制结束,自动重新进近反复练习</div></div><div class="sw" id="swFree"></div></div>
+  <div class="foot"><button class="btn ghost" id="cfgBack">返回</button><button class="btn primary" id="cfgStart">应用并开始</button></div>
+</div></div>
+
+<!-- 讲评 -->
+<div class="modal" id="report"><div class="card">
+  <div style="display:flex;align-items:flex-start;gap:18px;">
+    <div class="grade" id="rGrade">A</div>
+    <div style="flex:1;"><div class="verdict" id="rVerdict">着陆成功</div><div class="rsub" id="rSub"></div></div>
+  </div>
+  <div class="metrics" id="rMetrics"></div>
+  <ul class="notes" id="rNotes"></ul>
+  <div class="foot"><button class="btn primary" id="rAgain">再次进近</button></div>
+</div></div>
+
+<!-- 帮助 / 设置 -->
+<div class="modal" id="help"><div class="card help-card">
+  <h2>操作手册</h2>
+  <p class="dim">第一视角进近着陆。成败的关键是<b style="color:var(--ink)">最后 30 秒</b>:同时守住下滑道、中线、速度,然后在入口拉平。</p>
+  <h3>飞行操纵</h3>
+  <ul>
+    <li>右侧<b>摇杆</b>:上推抬头 / 下拉低头 / 左右压坡度。松手副翼自动回中扶平,俯仰保持当前姿态。</li>
+    <li>左侧<b>推力杆</b>:上下拖动设油门。发动机有 spool 延迟,提前量很重要。</li>
+    <li>底部<b>方向舵脚蹬</b>(脚舵):控制偏航。顶/侧风进近时用它把机头对正跑道(crab / de-crab),接地前蹬正,地面滑跑保持中线——这是把飞机对准跑道的关键。</li>
+    <li>键盘:<span class="kbd">W/S</span>俯仰,<span class="kbd">A/D</span>横滚,<span class="kbd">Z/C</span>方向舵,<span class="kbd">Shift/Ctrl</span>油门,<span class="kbd">F/V</span>襟翼,<span class="kbd">G</span>起落架,<span class="kbd">B</span>扰流板,<span class="kbd">空格</span>刹车/反推,<span class="kbd">Enter</span>复飞,<span class="kbd">E</span>EMMA。</li>
+  </ul>
+  <h3>EMMA · AI 副驾</h3>
+  <ul>
+    <li>点亮系统区的 <b style="color:var(--cyan)">EMMA</b> 键即把控制权交给 AI 副驾。她会自动接管油门/姿态/脚舵,把飞机从当前状态拉回下滑道与中线优雅着陆;若姿态无法挽救则自动复飞、爬升、重新建立进近。</li>
+    <li><b>分轴接管</b>:你动其中一个操纵(只动摇杆 / 只动脚舵 / 只动油门),EMMA 只交还<b>你正在操作的那一根轴</b>,其余轴她继续飞——不会因为你碰一下就全撒手。松手数秒后该轴自动交还。<b>仅按 EMMA 键</b>才整体关闭。</li>
+  </ul>
+  <h3>仪表与引导</h3>
+  <ul>
+    <li>中央<b>姿态仪</b>蓝天棕地,黄色为机头。左带<b>空速</b>(带绿色趋势矢量),右带<b>气压高度</b>,底部<b>航向</b>。</li>
+    <li><b>ILS</b>:底部菱形=航向道(对中线),右侧菱形=下滑道(对 3°),两者居中即完美。</li>
+    <li>跑道左侧 <b>PAPI</b> 四灯:两白两红=正好;偏红=偏低,偏白=偏高。</li>
+    <li>会有<b>无线电高度回报</b>("FIFTY...FORTY...")和 GPWS 告警("SINK RATE / PULL UP")。</li>
+  </ul>
+  <div style="margin-top:16px;border-top:1px solid var(--edge);padding-top:4px;">
+    <div class="toggle-row"><div><b>声音</b><div class="dim" style="font-size:12px;">发动机 / 风噪 / 语音回报与告警</div></div><div class="sw on" id="swSound"></div></div>
+    <div class="toggle-row"><div><b>设备陀螺仪控制</b><div class="dim" style="font-size:12px;">手机倾斜操纵横滚/俯仰(需授权,部分设备不支持)</div></div><div class="sw" id="swGyro"></div></div>
+    <div class="toggle-row"><div><b>俯仰反转</b><div class="dim" style="font-size:12px;">改为"上推=低头"的真实驾驶杆方向</div></div><div class="sw" id="swInvert"></div></div>
+    <div class="toggle-row"><div><b>颠簸 / 阵风</b><div class="dim" style="font-size:12px;">轻度大气湍流(更真实但更难)</div></div><div class="sw on" id="swTurb"></div></div>
+    <div class="toggle-row"><div><b>精简飞行视野</b><div class="dim" style="font-size:12px;">飞行中自动隐藏顶部信息角标,相位变化时短暂回显,腾出宝贵视野</div></div><div class="sw on" id="swClean"></div></div>
+    <div class="toggle-row"><div><b>显示设备</b><div class="dim" style="font-size:12px;" id="devLine">自动探测 —</div></div>
+      <div class="seg" style="margin:0;flex:0 0 auto;">
+        <div class="seg-opt" data-dev="phone">手机</div>
+        <div class="seg-opt" data-dev="tablet">iPad</div>
+        <div class="seg-opt" data-dev="desktop">电脑</div>
+      </div>
+    </div>
+    <div class="toggle-row"><div><b>时段</b><div class="dim" style="font-size:12px;">外景天空 / 光照 / 灯光随时间变化</div></div>
+      <div class="seg" style="margin:0;flex:0 0 auto;">
+        <div class="seg-opt on" data-tod="dusk">黄昏</div>
+        <div class="seg-opt" data-tod="noon">正午</div>
+        <div class="seg-opt" data-tod="night">夜间</div>
+      </div>
+    </div>
+  </div>
+  <div class="foot"><button class="btn primary" id="helpClose">返回</button></div>
+</div></div>
+
+<!-- 平台 SDK(同源,external+link 全屏直跳仍可上报落地评分) -->
+<script src="/arcade-sdk.js"></script>
+<!-- 模块化:sys(中央开关注册表)最先 → config/render/emma 先加载定义,game.js 末尾装配+主循环 -->
+<script src="sys.js"></script>
+<script src="config.js"></script>
+<script src="render.js"></script>
+<script src="emma.js"></script>
+<script src="game.js"></script>
+</body>
+</html>
