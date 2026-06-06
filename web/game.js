@@ -95,6 +95,7 @@ function resetState(){
   if(typeof ELEC!=='undefined')ELEC.reset();
   if(typeof FBW!=='undefined')FBW.reset();
   if(typeof SPATIAL!=='undefined')SPATIAL.reset();
+  if(typeof WEATHER!=='undefined'&&WEATHER.resetWx)WEATHER.resetWx();
 }
 resetState();
 const cfg={ gyro:false, invertPitch:false, sound:true, turb:true, gyroBase:null, tod:'dusk' };
@@ -359,7 +360,8 @@ function setLayout(){
 //==================================================================
 function vStall(){
   const stallA=AC.aoaStall+AC.flapStallBonus[S.flaps];
-  const CLmax=AC.CL0+AC.CLa*stallA+AC.flapCL[S.flaps];
+  let CLmax=AC.CL0+AC.CLa*stallA+AC.flapCL[S.flaps];
+  if(typeof WEATHER!=='undefined'&&WEATHER.ice)CLmax/=(1+clamp(WEATHER.ice/1500,0,0.35));   // 积冰破坏升力面→CLmax降→失速速度升
   return Math.sqrt(2*AC.m*AC.g/(AC.rho*AC.S*Math.max(CLmax,0.5)));
 }
 function updatePhysics(dt){
@@ -367,7 +369,7 @@ function updatePhysics(dt){
   if(ap.active&&ap.mode==='reposition')return;
   S.t+=dt;
   // 液压:操纵增益(液压低→俯仰/横滚迟钝沉重)
-  const hg=(typeof HYD!=='undefined')?HYD.ctrlGain():1;
+  const hg=((typeof HYD!=='undefined')?HYD.ctrlGain():1)*((typeof WEATHER!=='undefined'&&WEATHER.icePenalty)?WEATHER.icePenalty():1);  // 液压×积冰操纵效率
   // 电传飞控 FBW(正常法则:松杆1g航迹/坡度保持+包线保护);关或降级→直接法则
   const fbwOn=(typeof FBW!=='undefined'&&typeof SYS!=='undefined'&&SYS.get('features','fbw'));
   if(fbwOn&&FBW.apply(S,S.pitchIn,S.rollIn,dt,hg)){ /* 正常法则已更新 S.pitch/roll */ }
@@ -379,7 +381,7 @@ function updatePhysics(dt){
     S.roll=clamp(S.roll,-45,45);
   }
   // 多发引擎:各发独立 spool/状态机(engines.js);S.N1 取队均(供 UI/EMMA/声音向后兼容)
-  if(typeof ENGINES!=='undefined'&&ENGINES.list.length){ ENGINES.step(dt,S.throttle); if(typeof FUEL!=='undefined')FUEL.step(dt); if(typeof HYD!=='undefined')HYD.step(dt); if(typeof ELEC!=='undefined')ELEC.step(dt); S.N1=ENGINES.avgN1(); }
+  if(typeof ENGINES!=='undefined'&&ENGINES.list.length){ ENGINES.step(dt,S.throttle); if(typeof FUEL!=='undefined')FUEL.step(dt); if(typeof HYD!=='undefined')HYD.step(dt); if(typeof ELEC!=='undefined')ELEC.step(dt); if(typeof WEATHER!=='undefined'&&WEATHER.step)WEATHER.step(dt,S); S.N1=ENGINES.avgN1(); }
   else { const spool=(S.throttle>S.N1?0.55:0.95); S.N1=clamp(S.N1+(S.throttle-S.N1)*Math.min(1,dt*spool*2.4),0,1); }
   // 扰流板自动展开:需 B 系统液压(液压失→不可展)
   if(S.onGround&&S.spoilerArmed&&!S.spoilerOut&&(typeof HYD==='undefined'||HYD.spoilerOK())){S.spoilerOut=true;syncSysUI();}

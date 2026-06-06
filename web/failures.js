@@ -59,6 +59,8 @@ FAILURES.register('elecFail', { sys:'ELEC', msg:'ELEC ESS BUS', level:'warning',
   trigger(){ if(typeof ELEC!=='undefined')ELEC.fail(true); },
   clear(){ if(typeof ELEC!=='undefined')ELEC.fail(false); } });
 FAILURES.register('tireBurst',{ sys:'GEAR', msg:'R TIRE BURST',level:'caution' });  // 物理在 game.js 地面分支读 active
+FAILURES.register('windshear',{ sys:'WX',   msg:'WINDSHEAR · GO AROUND',level:'warning' });  // weather.js 微下击暴流驱动
+FAILURES.register('icing',    { sys:'WX',   msg:'ICING',    level:'caution' });               // weather.js 积冰驱动
 
 // MTBF 随机故障注入(泊松):按难度概率随机触发未激活故障。需 SYS.env.randomFailures 开。
 FAILURES._racc=0;
