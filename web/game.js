@@ -711,6 +711,25 @@ function syncRuntimeUI(){
   if(typeof PANELS!=='undefined')PANELS.sync();                // 刷新当前打开面板读数
 }
 let _lastPhase='';
+//------------------ 主警告/警戒灯 + 警告音 + 消音(recall) ------------------
+const mWarn=$('mWarn'),mCaut=$('mCaut');
+const masterAck={warn:false,caut:false};
+let _alertTimer=null;
+function setAlert(on){
+  if(on&&!_alertTimer){_alertTimer=setInterval(()=>Sound.blip(880,0.18),900);Sound.blip(880,0.18);}
+  else if(!on&&_alertTimer){clearInterval(_alertTimer);_alertTimer=null;}
+}
+function updateMaster(){
+  if(typeof FAILURES==='undefined')return;
+  const w=FAILURES.hasWarning(), c=FAILURES.hasCaution();
+  if(!w)masterAck.warn=false; if(!c)masterAck.caut=false;   // 故障消失则 recall 复位
+  if(mWarn)mWarn.classList.toggle('on',w&&!masterAck.warn);
+  if(mCaut)mCaut.classList.toggle('on',c&&!masterAck.caut);
+  setAlert(w&&!masterAck.warn);                              // 仅 warning 级响警告音
+}
+if(mWarn)mWarn.addEventListener('click',()=>{masterAck.warn=true;updateMaster();});
+if(mCaut)mCaut.addEventListener('click',()=>{masterAck.caut=true;updateMaster();});
+
 let last=performance.now(),acc=0;const STEP=1/120;
 function loop(now){
   let dt=(now-last)/1000;last=now;if(dt>0.1)dt=0.1;
@@ -718,7 +737,8 @@ function loop(now){
     pollInputs();acc+=dt;let n=0;
     while(acc>=STEP&&n<8){if(ap.level!=='off')autopilot(STEP);updatePhysics(STEP);acc-=STEP;n++;}
     if(acc>STEP)acc=0;
-    Sound.update(dt);
+    if(typeof FAILURES!=='undefined')FAILURES.step(dt);       // 推进故障连锁
+    Sound.update(dt); updateMaster();
     syncRuntimeUI();drawWorld();drawPFD();drawFlightDirector();
   }catch(err){console.error(err);}
   requestAnimationFrame(loop);

@@ -314,3 +314,22 @@ html[data-device=desktop] .sysbtn .kbdhint{display:block;}
 .eng-btn.xfeed.on{color:var(--cyan);border-color:#1d6fb0;background:linear-gradient(180deg,#0c3a52,#08222f);}
 .fuel-total{font-family:var(--mono);font-size:12px;color:var(--ink-dim);}
 .fuel-total b{color:var(--amb);font-size:17px;font-weight:700;margin:0 3px;}
+/* 主警告/警戒灯 */
+/* 主警告灯永在最上层(面板覆盖层之上),随时可见可消音 */
+#master{position:absolute;top:54px;right:13px;display:flex;flex-direction:column;gap:6px;z-index:11;pointer-events:auto;}
+.mlight{width:50px;height:30px;display:grid;place-items:center;font-family:var(--mono);font-size:9px;font-weight:700;letter-spacing:.08em;
+  border-radius:7px;border:1.5px solid var(--edge2);background:#0b0f17;color:#3a4250;cursor:pointer;transition:.1s;box-shadow:inset 0 0 6px #000;}
+.mlight.warn.on{background:linear-gradient(180deg,#ff4a3d,#8a1d14);border-color:#ff4a3d;color:#fff;box-shadow:0 0 16px rgba(255,74,61,.7);animation:mblink .5s steps(1) infinite;}
+.mlight.caut.on{background:linear-gradient(180deg,#ffb02e,#9a6810);border-color:#ffb02e;color:#1a1206;box-shadow:0 0 14px rgba(255,176,46,.6);}
+@keyframes mblink{50%{opacity:.45;}}
+/* 故障注入 + ECAM */
+.fail-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;}
+.fail-btn{position:relative;text-align:left;padding:9px 10px;line-height:1.2;}
+.fail-btn .fsys{display:block;font-size:8px;color:var(--ink-faint2);margin-top:3px;letter-spacing:.1em;}
+.fail-btn.warning.on{color:var(--red);border-color:#8a2a22;background:linear-gradient(180deg,#2c1310,#180a09);}
+.fail-btn.caution.on{color:var(--amb);border-color:#7d6a1f;background:linear-gradient(180deg,#2a2208,#171005);}
+.ecam-hd{font-family:var(--mono);font-size:10px;letter-spacing:.12em;color:var(--ink-faint2);text-transform:uppercase;margin:16px 0 6px;border-top:1px solid var(--edge);padding-top:10px;}
+.ecam-list{min-height:60px;background:#070a10;border:1px solid var(--edge);border-radius:8px;padding:8px 11px;display:flex;flex-direction:column;gap:4px;}
+.ecam-msg{font-family:var(--mono);font-size:12px;font-weight:700;letter-spacing:.05em;}
+.ecam-msg.warning{color:var(--red);} .ecam-msg.caution{color:var(--amb);}
+.ecam-ok{font-family:var(--mono);font-size:11px;color:var(--grn2);}

@@ -49,6 +49,7 @@ SYS.register('failures','tireBurst', {on:false,label:'爆胎',     desc:'接地�
 SYS.register('panels','flight',{on:true,label:'飞行面板',      desc:'主飞行操纵 + PFD'});
 SYS.register('panels','engine',{on:true,label:'引擎 / 系统面板',desc:'多发控制 / 点火 / 启动机'});
 SYS.register('panels','fuel',  {on:true,label:'燃油面板',      desc:'三油箱 / 泵 / 交输活门'});
+SYS.register('panels','failures',{on:true,label:'故障 / ECAM', desc:'故障注入 + ECAM 告警列表'});
 SYS.register('panels','mcdu',  {on:true,label:'MCDU 飞控电脑',  desc:'屏幕四周 LSK + 键盘多页 CDU(旗舰件,组12-13)'});
 
 SYS.load();
