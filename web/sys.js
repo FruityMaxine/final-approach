@@ -79,6 +79,7 @@ SYS.register('panels','proc',   {on:true,label:'程序',         desc:'SID/STAR 
 SYS.register('panels','chart',  {on:true,label:'航图',         desc:'进近图/航图:平面进近图 + 垂直剖面(静态参考,区别于 ND)'});
 SYS.register('panels','precip', {on:true,label:'降水',         desc:'降水天气+污染跑道:雨/雪渲染+干/湿/雪 μ 摩擦(降刹车效能)'});
 SYS.register('panels','dl',     {on:true,label:'数据链',       desc:'ATIS 自动情报通播 + CPDLC 文本数据链报文(区别于 ATC 语音)'});
+SYS.register('panels','msn',    {on:true,label:'任务',         desc:'任务关卡链:6 关挑战(标准/侧风/IMC/单发/风切变/满载)+解锁进度'});
 
 SYS.load();
 if(typeof window!=='undefined')window.SYS=SYS;

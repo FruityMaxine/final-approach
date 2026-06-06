@@ -540,6 +540,7 @@ function endGame(reason){
   else{grade='E';gc=getC('--red');verdict='粗糙的着陆';}
   if(typeof HISTORY!=='undefined')HISTORY.record({score:score|0,grade,fpm:fpm|0,tdz:tdz|0,xoff:+xoff.toFixed(1)});   // 履历记录
   if(typeof GHOST!=='undefined'&&typeof REPLAY!=='undefined')GHOST.maybeSave(RWY.aptName,REPLAY.buf,score);   // 幽灵:超最佳则存轨迹
+  if(typeof MISSIONS!=='undefined')MISSIONS.onLanding(score);   // 任务关卡:评分达标判通关
   showReport(grade,gc,verdict,
     '综合评分 '+(score|0)+'/100。着陆质量取决于稳定进近——下滑道、中线、速度在最后 30 秒都不能松手。',
     [['触地下降率',(fpm|0)+' fpm',fpm<300?'柔和':(fpm<600?'偏硬':'重着陆')],
@@ -566,6 +567,7 @@ function crashedReport(reason,td){
   }else metrics=[['结果',reason==='overfly'?'飞越':'失败',''],['高度',Math.round(S.alt*M_TO_FT)+' ft','']];
   notes.push(['','建议:从稳定进近练起——保持 3° 下滑道(PAPI 两白两红)、对准中线、速度锁定 Vref,在入口轻柔拉平。']);
   if(typeof HISTORY!=='undefined')HISTORY.record({score:0,grade:'F',fpm:td?td.vsFpm|0:0,tdz:td?td.zPos|0:0,xoff:td?+Math.abs(td.xOff).toFixed(1):0});   // 履历记录(失败)
+  if(typeof MISSIONS!=='undefined')MISSIONS.onLanding(0);   // 任务关卡:失败不通关
   showReport('F',getC('--red'),info[0],info[1],metrics,notes);
 }
 function showReport(grade,gColor,verdict,sub,metrics,notes){
