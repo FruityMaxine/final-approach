@@ -660,3 +660,23 @@ html[data-device=phone] .syspanel{padding:8px 10px 10px;}
 .gh-best b.none{font-size:10px;color:var(--ink-faint2);font-weight:400;}
 .gh-clr{width:100%;font-family:var(--mono);font-size:10px;color:var(--ink-dim);background:#11151e;border:1px solid var(--edge2);border-radius:6px;padding:7px;cursor:pointer;}
 .gh-clr:hover{color:var(--red);border-color:#8a2a22;}
+
+/* 载重平衡 W&B(高密度,手机零横滚) */
+.wb-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:6px;margin-bottom:9px;}
+.wb-st{display:flex;align-items:center;gap:5px;background:linear-gradient(160deg,#141925,#0b0e16);border:1px solid var(--edge);border-radius:7px;padding:5px 7px;}
+.wb-nm{flex:1;min-width:0;font-family:var(--mono);font-size:9.5px;color:var(--ink-dim);}
+.wb-b{flex:0 0 auto;font-family:var(--mono);font-size:13px;color:var(--ink-dim);background:#11151e;border:1px solid var(--edge2);border-radius:4px;width:20px;height:20px;cursor:pointer;}
+.wb-b:hover{color:var(--ink);border-color:var(--edge3);}
+.wb-v{flex:0 0 auto;font-family:var(--mono);font-size:11px;font-weight:700;color:var(--grn);min-width:34px;text-align:center;}
+.wb-out{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px;margin-bottom:8px;}
+.wb-cell{display:flex;flex-direction:column;gap:1px;background:#070a10;border:1px solid var(--edge);border-radius:7px;padding:6px 8px;text-align:center;}
+.wb-cell>span{font-family:var(--mono);font-size:8px;color:var(--ink-faint2);}
+.wb-cell>b{font-family:var(--mono);font-size:15px;font-weight:700;color:var(--cyan);}
+.wb-cell>b small{font-size:7px;color:var(--ink-faint2);margin-left:1px;}
+.wb-cell.ok>b{color:var(--grn);} .wb-cell.no>b{color:var(--red);} .wb-cell.no{border-color:#8a2a22;}
+.wb-envlbl{font-family:var(--mono);font-size:9px;color:var(--ink-faint2);margin-bottom:4px;}
+.wb-warn{color:var(--red);font-weight:700;}
+.wb-env{position:relative;height:12px;border-radius:6px;background:#1a0c0a;border:1px solid var(--edge);overflow:hidden;}
+.wb-envg{position:absolute;top:0;bottom:0;background:rgba(46,230,143,.22);border-left:1px solid var(--grn2);border-right:1px solid var(--grn2);}
+.wb-mk{position:absolute;top:-2px;bottom:-2px;width:3px;border-radius:2px;transform:translateX(-50%);}
+.wb-mk.ok{background:var(--grn);box-shadow:0 0 6px var(--grn);} .wb-mk.no{background:var(--red);box-shadow:0 0 6px var(--red);}

@@ -161,7 +161,7 @@ MCDU.pages={
   FUEL(){ return {title:'FUEL PRED', rows:[
     {ll:'AT', lv:'RW27', rl:'UTC/EFOB', rv:this._fuel()+'KG'},
     {},
-    {ll:'GW', lv:(typeof AC!=='undefined'?Math.round(AC.m)+'KG':'--'), rl:'CG', rv:'27.0%'},
+    {ll:'GW', lv:(typeof WB!=='undefined'?Math.round(WB.gw())+'KG':(typeof AC!=='undefined'?Math.round(AC.m)+'KG':'--')), rl:'CG', rv:(typeof WB!=='undefined'?WB.cg().toFixed(1)+'%':'27.0%')},
     {ll:'L TANK', lv:this._tank('left')+'KG', rl:'R TANK', rv:this._tank('right')+'KG'},
     {ll:'CTR TANK', lv:this._tank('center')+'KG', rl:'TOTAL', rv:this._fuel()+'KG'},
     {ll:'MIN FUEL TEMP', lv:'-44°'} ]}; },

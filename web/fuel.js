@@ -48,8 +48,8 @@ const FUEL={
         e.fuelStarve=true; e.state='fail';
       }
     }
-    // 油量影响总重(干重 + 当前油量)
-    if(typeof AC!=='undefined'){ AC.m=AC.dryMass+this.total(); }
+    // 油量影响总重(干重 + 当前油量 + W&B 装载)
+    if(typeof AC!=='undefined'){ AC.m=AC.dryMass+this.total()+(typeof WB!=='undefined'?WB.payload():0); }
   },
 };
 if(typeof window!=='undefined')window.FUEL=FUEL;

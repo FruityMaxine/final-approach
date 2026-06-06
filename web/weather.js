@@ -72,7 +72,7 @@ WEATHER.step=function(dt,S){
   if(icingEnv&&!this.antiIce&&!S.onGround)this.ice=Math.min(1800,this.ice+dt*120);
   if(this.antiIce)this.ice=Math.max(0,this.ice-dt*80);
   // 增重(vStall 读 AC.m 自动升)— AC.m = 干重 + 油量 + 积冰(协调 fuel.js)
-  if(typeof AC!=='undefined')AC.m=AC.dryMass+((typeof FUEL!=='undefined')?FUEL.total():18000)+this.ice;
+  if(typeof AC!=='undefined')AC.m=AC.dryMass+((typeof FUEL!=='undefined')?FUEL.total():18000)+this.ice+((typeof WB!=='undefined')?WB.payload():0);
   // ECAM 告警
   if(typeof FAILURES!=='undefined'&&FAILURES.reg.icing){
     const ic=this.ice>200; if(ic&&!FAILURES.reg.icing.active)FAILURES.trigger('icing'); else if(!ic&&FAILURES.reg.icing.active)FAILURES.clear('icing');
