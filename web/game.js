@@ -825,6 +825,7 @@ swGyro.addEventListener('click',()=>{const on=!swGyro.classList.contains('on');s
 $('swInvert').addEventListener('click',()=>{cfg.invertPitch=!cfg.invertPitch;$('swInvert').classList.toggle('on',cfg.invertPitch);setPitchRaw(S.pitchInRaw);});
 $('swTurb').addEventListener('click',()=>{cfg.turb=!cfg.turb;$('swTurb').classList.toggle('on',cfg.turb);if(typeof SYS!=='undefined')SYS.set('features','turbulence',cfg.turb);if(typeof applyConfig==='function')applyConfig();});
 $('swClean').addEventListener('click',()=>{hudAutoHide=!hudAutoHide;$('swClean').classList.toggle('on',hudAutoHide);if(typeof SYS!=='undefined')SYS.set('features','cleanHud',hudAutoHide);if(hudAutoHide)revealTags();else{clearTimeout(_tagsTimer);appEl.classList.remove('tags-hidden');}});
+window.setHudClean=function(on){hudAutoHide=on;$('swClean').classList.toggle('on',on);if(on)revealTags();else{clearTimeout(_tagsTimer);appEl.classList.remove('tags-hidden');}};   // 供系统总控面板调
 // 设备三屏手动覆盖
 document.querySelectorAll('.seg-opt[data-dev]').forEach(s=>{
   s.addEventListener('click',()=>{
