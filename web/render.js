@@ -21,7 +21,9 @@ function resizeWorld(){
   cx=W/2;cy=Hh/2;focal=W*0.95;
 }
 function resizeWorldIfNeeded(){const r=world.parentElement.getBoundingClientRect();if(Math.abs(r.width-W)>1||Math.abs(r.height-Hh)>1)resizeWorld();}
-function project(px,py,pz){
+const NEAR=1;   // 近平面(相机前 1m);多边形跨此面时裁剪而非整体丢弃
+// 世界坐标 → 相机空间{r右,u上,z前}。投影分两步,便于近平面裁剪。
+function toCamera(px,py,pz){
   const yaw=S.hdg*RAD,pit=S.pitch*RAD,rol=S.roll*RAD;
   const cp=Math.cos(pit),sp=Math.sin(pit),cyaw=Math.cos(yaw),syaw=Math.sin(yaw);
   const fx=cp*syaw,fy=sp,fz=cp*cyaw;
@@ -31,10 +33,30 @@ function project(px,py,pz){
   const r2x=rx*cr+ux*sr,r2y=uy*sr,r2z=rz*cr+uz*sr;
   const u2x=ux*cr-rx*sr,u2y=uy*cr,u2z=uz*cr-rz*sr;
   const dx=px-S.x,dy=py-S.alt,dz=pz-S.z;
-  const camZ=dx*fx+dy*fy+dz*fz;
-  if(camZ<=1)return null;
-  return {x:cx+focal*(dx*r2x+dy*r2y+dz*r2z)/camZ, y:cy-focal*(dx*u2x+dy*u2y+dz*u2z)/camZ, z:camZ};
+  return { r:dx*r2x+dy*r2y+dz*r2z, u:dx*u2x+dy*u2y+dz*u2z, z:dx*fx+dy*fy+dz*fz };
 }
+function projectCam(c){ return {x:cx+focal*c.r/c.z, y:cy-focal*c.u/c.z, z:c.z}; }
+function project(px,py,pz){ const c=toCamera(px,py,pz); return c.z<=NEAR?null:projectCam(c); }
+// Sutherland-Hodgman 近平面裁剪:输入相机空间顶点环,保留 z>=NEAR 一侧,跨界处插值切割
+function clipPolyNear(cam){
+  const out=[],n=cam.length;
+  for(let i=0;i<n;i++){
+    const A=cam[i],B=cam[(i+1)%n],Ain=A.z>=NEAR,Bin=B.z>=NEAR;
+    if(Ain)out.push(A);
+    if(Ain!==Bin){ const t=(NEAR-A.z)/(B.z-A.z); out.push({r:A.r+(B.r-A.r)*t,u:A.u+(B.u-A.u)*t,z:NEAR}); }
+  }
+  return out;
+}
+// 世界坐标多边形 → 相机空间 → 近平面裁剪 → 投影填充(跨近平面切割,不再整体丢弃)
+function fillPoly3d(ptsWorld,col){
+  const cam=ptsWorld.map(p=>toCamera(p[0],p[1],p[2]));
+  const cl=clipPolyNear(cam); if(cl.length<3)return false;
+  wctx.fillStyle=col;wctx.beginPath();
+  for(let i=0;i<cl.length;i++){const s=projectCam(cl[i]);if(i===0)wctx.moveTo(s.x,s.y);else wctx.lineTo(s.x,s.y);}
+  wctx.closePath();wctx.fill();return true;
+}
+// 四边形(世界坐标四点)经近平面裁剪填充
+function quad3d(a,b,c,d,col){ fillPoly3d([a,b,c,d],col); }
 
 //------------------ 时段(time-of-day)调色板 ------------------
 const TOD={
@@ -78,24 +100,25 @@ function quad(p1,p2,p3,p4,col){if(!(p1&&p2&&p3&&p4))return;wctx.fillStyle=col;wc
 // 3D 盒(建筑):底面 y=0 到 yTop,x0..x1 × z0..z1。可见面按投影深度排序后填,带顶/明/暗三色。
 function worldBox(x0,x1,z0,z1,yTop,colTop,colLit,colDark,winSpec){
   const F=[
-    [[x0,yTop,z0],[x1,yTop,z0],[x1,yTop,z1],[x0,yTop,z1],colTop,'top'],
-    [[x0,0,z0],[x1,0,z0],[x1,yTop,z0],[x0,yTop,z0],colLit,'zn'],
-    [[x0,0,z1],[x1,0,z1],[x1,yTop,z1],[x0,yTop,z1],colDark,'zf'],
-    [[x0,0,z0],[x0,0,z1],[x0,yTop,z1],[x0,yTop,z0],colDark,'xl'],
-    [[x1,0,z0],[x1,0,z1],[x1,yTop,z1],[x1,yTop,z0],colLit,'xr'],
+    {p:[[x0,yTop,z0],[x1,yTop,z0],[x1,yTop,z1],[x0,yTop,z1]],col:colTop,tag:'top'},
+    {p:[[x0,0,z0],[x1,0,z0],[x1,yTop,z0],[x0,yTop,z0]],col:colLit,tag:'zn'},
+    {p:[[x0,0,z1],[x1,0,z1],[x1,yTop,z1],[x0,yTop,z1]],col:colDark,tag:'zf'},
+    {p:[[x0,0,z0],[x0,0,z1],[x0,yTop,z1],[x0,yTop,z0]],col:colDark,tag:'xl'},
+    {p:[[x1,0,z0],[x1,0,z1],[x1,yTop,z1],[x1,yTop,z0]],col:colLit,tag:'xr'},
   ];
   const drawn=[];
   for(const f of F){
-    const ps=[project(f[0][0],f[0][1],f[0][2]),project(f[1][0],f[1][1],f[1][2]),project(f[2][0],f[2][1],f[2][2]),project(f[3][0],f[3][1],f[3][2])];
-    if(ps[0]&&ps[1]&&ps[2]&&ps[3]){drawn.push({ps,mz:(ps[0].z+ps[1].z+ps[2].z+ps[3].z)/4,col:f[4],tag:f[5]});}
+    const cl=clipPolyNear(f.p.map(p=>toCamera(p[0],p[1],p[2]))); if(cl.length<3)continue;
+    let mz=0;for(const c of cl)mz+=c.z;mz/=cl.length;
+    drawn.push({scr:cl.map(projectCam),mz,col:f.col,tag:f.tag});
   }
   drawn.sort((a,b)=>b.mz-a.mz);
   for(const d of drawn){
-    wctx.fillStyle=d.col;wctx.beginPath();wctx.moveTo(d.ps[0].x,d.ps[0].y);for(let i=1;i<4;i++)wctx.lineTo(d.ps[i].x,d.ps[i].y);wctx.closePath();wctx.fill();
+    const a=d.scr;
+    wctx.fillStyle=d.col;wctx.beginPath();wctx.moveTo(a[0].x,a[0].y);for(let i=1;i<a.length;i++)wctx.lineTo(a[i].x,a[i].y);wctx.closePath();wctx.fill();
     // 窗格灯(夜间/黄昏的 zn/xr 朝向面)
     if(winSpec&&(d.tag==='zn'||d.tag==='xr')){
-      const a=d.ps,minx=Math.min(a[0].x,a[3].x),maxx=Math.max(a[1].x,a[2].x);
-      const topy=Math.min(a[2].y,a[3].y),boty=Math.max(a[0].y,a[1].y);
+      const minx=Math.min(...a.map(p=>p.x)),maxx=Math.max(...a.map(p=>p.x)),topy=Math.min(...a.map(p=>p.y)),boty=Math.max(...a.map(p=>p.y));
       const cols=Math.max(2,Math.min(6,(maxx-minx)/9|0)),rows=Math.max(2,Math.min(8,(boty-topy)/9|0));
       for(let r=0;r<rows;r++)for(let c=0;c<cols;c++){
         if(((r*7+c*13+(d.tag==='zn'?0:5))%5)>2)continue;
@@ -105,9 +128,12 @@ function worldBox(x0,x1,z0,z1,yTop,colTop,colLit,colDark,winSpec){
     }
   }
 }
-// 地面直线(透视投影下世界直线仍为屏幕直线):给定两端世界点画一条,自动跳过相机后
+// 地面直线:近平面裁剪后画(一端在相机后则切到近平面,不再整体跳过)
 function groundLine(x0,z0,x1,z1,col,wd){
-  const a=project(x0,0,z0),b=project(x1,0,z1);if(!a||!b)return;
+  let A=toCamera(x0,0,z0),B=toCamera(x1,0,z1);
+  const Ain=A.z>=NEAR,Bin=B.z>=NEAR; if(!Ain&&!Bin)return;
+  if(Ain!==Bin){ const t=(NEAR-A.z)/(B.z-A.z),P={r:A.r+(B.r-A.r)*t,u:A.u+(B.u-A.u)*t,z:NEAR}; if(Ain)B=P;else A=P; }
+  const a=projectCam(A),b=projectCam(B);
   wctx.strokeStyle=col;wctx.lineWidth=wd;wctx.beginPath();wctx.moveTo(a.x,a.y);wctx.lineTo(b.x,b.y);wctx.stroke();
 }
 
@@ -185,8 +211,8 @@ function drawTerrain(T){
   const tiles=[[-900,-300,400,1400],[300,1000,-200,900],[-1300,-600,1600,2900],[700,1500,1200,2600],
                [-700,-100,3200,4600],[200,900,3400,5000],[-1500,-900,-400,800],[900,1700,-300,1000]];
   for(let i=0;i<tiles.length;i++){const t=tiles[i],fc=T.field[i%2];
-    if(t[3]<=near)continue;
-    quad(project(t[0],-0.2,Math.max(t[2],near)),project(t[1],-0.2,Math.max(t[2],near)),project(t[1],-0.2,t[3]),project(t[0],-0.2,t[3]),'rgba('+hexRgb(fc[0])+','+fc[1]+')');
+    if(t[3]<=S.z+NEAR)continue;
+    quad3d([t[0],-0.2,t[2]],[t[1],-0.2,t[2]],[t[1],-0.2,t[3]],[t[0],-0.2,t[3]],'rgba('+hexRgb(fc[0])+','+fc[1]+')');  // 近平面裁剪
   }
   // 网格:横向距离杆(constant z)+ 纵向线(constant x),faded
   for(let z=200;z<=far;z+=250){const f=clamp(1.1-z/5200,0.06,0.5);groundLine(-1600,z,1600,z,T.grid+f+')',1);}
@@ -228,7 +254,7 @@ function drawAirport(T){
   worldBox(95,170,420,520,20,T.bld,T.bldLit,T.bld,null);
   // 左侧平行滑行道
   const hw=RWY.W/2;
-  for(let z=120;z<RWY.L;z+=60){quad(project(-hw-30,0.02,z),project(-hw-18,0.02,z),project(-hw-18,0.02,z+38),project(-hw-30,0.02,z+38),'rgba(60,66,76,.7)');}
+  for(let z=120;z<RWY.L;z+=60){quad3d([-hw-30,0.02,z],[-hw-18,0.02,z],[-hw-18,0.02,z+38],[-hw-30,0.02,z+38],'rgba(60,66,76,.7)');}
 }
 
 //------------------ 进近灯(ALSF 式:中线灯排 + 横排 + 顺序闪 rabbit) ------------------
@@ -252,13 +278,13 @@ function drawApproachLights(T){
 //------------------ 跑道(+ 距离剩余牌) ------------------
 function drawRunway(T){
   const hw=RWY.W/2,seg=50,boost=T.lightBoost;
-  for(let z0=0;z0<RWY.L;z0+=seg){const z1=Math.min(z0+seg,RWY.L);const shade=z0<RWY.L*0.5?'#3c424c':'#363c45';quad(project(-hw,0,z0),project(hw,0,z0),project(hw,0,z1),project(-hw,0,z1),shade);}
-  for(let i=0;i<8;i++){const w8=(RWY.W-8)/8,x0=-hw+4+i*w8;quad(project(x0,0.03,3),project(x0+w8*0.62,0.03,3),project(x0+w8*0.62,0.03,26),project(x0,0.03,26),'rgba(248,248,252,.92)');}
+  for(let z0=0;z0<RWY.L;z0+=seg){const z1=Math.min(z0+seg,RWY.L);const shade=z0<RWY.L*0.5?'#3c424c':'#363c45';quad3d([-hw,0,z0],[hw,0,z0],[hw,0,z1],[-hw,0,z1],shade);}   // 跑道主面:近平面裁剪,贴近不消失
+  for(let i=0;i<8;i++){const w8=(RWY.W-8)/8,x0=-hw+4+i*w8;quad3d([x0,0.03,3],[x0+w8*0.62,0.03,3],[x0+w8*0.62,0.03,26],[x0,0.03,26],'rgba(248,248,252,.92)');}
   const pn=project(0,0.04,135);
   if(pn&&pn.z<2600){const sc=clamp(focal/pn.z*0.6,4,90);wctx.save();wctx.translate(pn.x,pn.y);wctx.rotate(S.roll*RAD);wctx.fillStyle='rgba(245,248,255,.9)';wctx.font='700 '+sc+'px '+MONO;wctx.textAlign='center';wctx.textBaseline='middle';wctx.fillText('27',0,0);wctx.restore();}
-  for(let zz=40;zz<RWY.L;zz+=60)quad(project(-0.45,0.03,zz),project(0.45,0.03,zz),project(0.45,0.03,zz+30),project(-0.45,0.03,zz+30),'rgba(250,250,255,.82)');
-  for(const s of[-1,1])quad(project(s*6,0.03,RWY.aim-30),project(s*9.5,0.03,RWY.aim-30),project(s*9.5,0.03,RWY.aim+30),project(s*6,0.03,RWY.aim+30),'rgba(245,245,250,.9)');
-  for(const s of[-1,1])quad(project(s*6,0.03,RWY.aim-330),project(s*9.5,0.03,RWY.aim-330),project(s*9.5,0.03,RWY.aim-300),project(s*6,0.03,RWY.aim-300),'rgba(245,245,250,.82)');
+  for(let zz=40;zz<RWY.L;zz+=60)quad3d([-0.45,0.03,zz],[0.45,0.03,zz],[0.45,0.03,zz+30],[-0.45,0.03,zz+30],'rgba(250,250,255,.82)');
+  for(const s of[-1,1])quad3d([s*6,0.03,RWY.aim-30],[s*9.5,0.03,RWY.aim-30],[s*9.5,0.03,RWY.aim+30],[s*6,0.03,RWY.aim+30],'rgba(245,245,250,.9)');
+  for(const s of[-1,1])quad3d([s*6,0.03,RWY.aim-330],[s*9.5,0.03,RWY.aim-330],[s*9.5,0.03,RWY.aim-300],[s*6,0.03,RWY.aim-300],'rgba(245,245,250,.82)');
   for(let z0=0;z0<RWY.L;z0+=seg){const z1=Math.min(z0+seg,RWY.L);for(const sx of[-hw,hw]){const a=project(sx,0.02,z0),b=project(sx,0.02,z1);if(a&&b){wctx.strokeStyle='rgba(242,242,247,.82)';wctx.lineWidth=clamp(180/Math.min(a.z,b.z),1,5);wctx.beginPath();wctx.moveTo(a.x,a.y);wctx.lineTo(b.x,b.y);wctx.stroke();}}}
   // 边灯(夜间增亮)
   for(let zz=0;zz<=RWY.L;zz+=120)for(const side of[-hw-1.5,hw+1.5]){const p=project(side,0.5,zz);if(p&&p.z<7000)dot(p,clamp(95/p.z,0.4,2.6),zz>RWY.L-500?'rgba(255,90,60,.92)':'rgba(255,250,225,'+clamp(0.85*boost,0.4,1)+')',boost>1.3?3:0);}
