@@ -746,3 +746,19 @@ html[data-device=phone] .syspanel{padding:8px 10px 10px;}
 .msn-go{width:100%;font-family:var(--mono);font-size:10px;color:var(--cyan);background:linear-gradient(180deg,#0c3a52,#08222f);border:1px solid #1d6fb0;border-radius:6px;padding:6px;cursor:pointer;transition:.12s;}
 .msn-go:hover{box-shadow:0 0 8px rgba(42,216,255,.3);} .msn-go:active{transform:scale(.98);}
 .msn-locked{font-family:var(--mono);font-size:9px;color:var(--ink-faint2);text-align:center;padding:5px;}
+
+/* 平显 HUD 增强面板(高密度,手机零横滚) */
+.hud-pan{display:flex;flex-direction:column;gap:8px;}
+.hud-master{width:100%;font-family:var(--mono);font-size:11px;font-weight:700;letter-spacing:.04em;color:var(--ink-dim);background:linear-gradient(180deg,#11151e,#0a0d14);border:1px solid var(--edge2);border-radius:7px;padding:8px;cursor:pointer;transition:.12s;}
+.hud-master.on{color:var(--grn);border-color:var(--grn2);background:linear-gradient(180deg,#0e2418,#08160f);box-shadow:0 0 8px rgba(46,230,143,.18);}
+.hud-master:active{transform:scale(.99);}
+.hud-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px;}
+.hud-chip{font-family:var(--mono);font-size:9.5px;font-weight:600;color:var(--ink-faint2);background:#0b0f17;border:1px solid var(--edge);border-radius:6px;padding:6px 4px;cursor:pointer;transition:.12s;text-align:center;}
+.hud-chip.on{color:var(--grn);border-color:var(--grn2);background:#0c2418;}
+.hud-chip:active{transform:scale(.96);}
+.hud-sens{display:flex;align-items:center;gap:7px;}
+.hud-sk{font-family:var(--mono);font-size:9px;color:var(--ink-faint2);flex:0 0 auto;}
+.hud-seg{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:4px;flex:1 1 auto;}
+.hud-sopt{font-family:var(--mono);font-size:9px;color:var(--ink-faint2);background:#0b0f17;border:1px solid var(--edge);border-radius:5px;padding:5px 2px;cursor:pointer;transition:.12s;text-align:center;}
+.hud-sopt.on{color:var(--cyan);border-color:#1d6fb0;background:#08222f;}
+.hud-note{font-family:var(--mono);font-size:8px;color:var(--ink-faint2);line-height:1.45;}

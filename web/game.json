@@ -44,6 +44,7 @@
       "precip.js",
       "datalink.js",
       "missions.js",
+      "hud.js",
       "mcdu.js",
       "tutorial.js",
       "replay.js",
@@ -59,7 +60,7 @@
     "飞行",
     "单机"
   ],
-  "version": "0.46.0.0",
+  "version": "0.47.0.0",
   "rules": [
     "操纵摇杆/油门/襟翼/脚舵,沿 3° 下滑道对准 27 号跑道",
     "保持下滑道(PAPI 两白两红)、对准中线、速度锁 Vref 140kt",
