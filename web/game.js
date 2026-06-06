@@ -501,6 +501,7 @@ function endGame(reason){
     return;
   }
   S.phase='ended';S.ended=true;
+  if(typeof REPLAY!=='undefined')REPLAY.stop();   // 停录:缓冲即本次完整进近
   Sound.warnTone(false);
   const td=S.touchdown;
   if(reason==='goaround'){
@@ -578,12 +579,14 @@ function doReset(){
   ap.axes={pitch:'auto',roll:'auto',throttle:'auto',rudder:'auto'};
   ap.engage={pitch:1,roll:1,throttle:1,rudder:1};ap.manualT={pitch:0,roll:0,throttle:0,rudder:0};
   resetState();S.started=true;
+  if(typeof REPLAY!=='undefined')REPLAY.start();   // 重新进近:重开轨迹录制
   syncThrottleUI();syncFlapUI();syncSysUI();updateStickKnob();updateRudderUI();updateEmmaBtn();
   calloutEl.classList.remove('show');
   if(typeof revealTags==='function')revealTags(4500);
 }
 $('rAgain').addEventListener('click',doReset);
 $('btnReset').addEventListener('click',doReset);
+$('rReplay').addEventListener('click',()=>{ repEl.classList.remove('show'); if(typeof PANELS!=='undefined')PANELS.open('replay'); });
 // 3D 投影 + 外景渲染(project/drawWorld/drawTerrain/drawAirport/drawScenery/
 // drawApproachLights/drawRunway/drawPAPI/drawHUD/time-of-day) 已抽到 render.js
 // (在本文件之前加载)。世界画布变量 W/Hh/DPR/focal/cx/cy/world/wctx 亦在 render.js。
@@ -790,6 +793,7 @@ function loop(now){
     if(typeof FAILURES!=='undefined'){ FAILURES.step(dt); if(S.started&&S.phase!=='ended')FAILURES.randomInject(dt); }   // 推进故障连锁 + MTBF 随机注入
     if(typeof SPATIAL!=='undefined')SPATIAL.update(dt,S);   // 空间迷向错觉(只偏外景,PFD 真实)
     if(typeof TUTORIAL!=='undefined')TUTORIAL.update(S,dt); // 新手教学逐帧检测完成→自动进下一步
+    if(typeof REPLAY!=='undefined')REPLAY.sample(S,dt);     // 飞行轨迹节流记录(REC_DT 内部节流)
     Sound.update(dt); updateMaster();
     syncRuntimeUI();drawWorld();drawPFD();drawFlightDirector();
   }catch(err){console.error(err);}
@@ -816,6 +820,7 @@ function startFlight(){
   revealTags(4500);
   setTimeout(()=>Sound.say('cleared to land, runway two seven'),300);
   if(typeof TUTORIAL!=='undefined'&&typeof SYS!=='undefined'&&SYS.get('features','tutorial'))TUTORIAL.start();
+  if(typeof REPLAY!=='undefined')REPLAY.start();   // 开录飞行轨迹
 }
 $('startBtn').addEventListener('click',startFlight);
 $('helpHint').addEventListener('click',()=>helpEl.classList.add('show'));
