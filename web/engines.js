@@ -18,7 +18,7 @@ const ENGINES={
     }));
     if(typeof renderEICAS==='function')renderEICAS();
   },
-  reset(){ for(const e of this.list){ e.n1=0.25;e.n2=0.62;e.egt=430;e.ff=0.6;e.state='run';e.throttleOvr=null;e.fuelCut=false;e.fire=false;e.starter=false;e.ign=false;e.pump=true; } },
+  reset(){ for(const e of this.list){ e.n1=0.25;e.n2=0.62;e.egt=430;e.ff=0.6;e.state='run';e.throttleOvr=null;e.fuelCut=false;e.fire=false;e.fireDmg=0;e.starter=false;e.ign=false;e.pump=true;e.fuelStarve=false; } },
   anyRun(){ return this.list.some(e=>e.state==='run'||e.state==='idle'); },
   avgN1(){ if(!this.list.length)return 0; let s=0; for(const e of this.list)s+=e.n1; return s/this.list.length; },
 
@@ -26,7 +26,6 @@ const ENGINES={
   step(dt, cmd){
     cmd=clamp(cmd,0,1);
     for(const e of this.list){
-      if(e.fire&&e.state!=='off'&&e.state!=='fail')e.state='fail';     // 起火→失效
       const t=(e.throttleOvr!=null?clamp(e.throttleOvr,0,1):cmd);       // 单发油门覆盖(Tick4 用)
       if(e.fuelCut){                                                    // 断油停车
         e.state='off'; e.n1=Math.max(0,e.n1-dt*0.25); e.n2=Math.max(0,e.n2-dt*0.20); e.ff=0; e.egt=Math.max(40,e.egt-dt*60);
@@ -44,10 +43,16 @@ const ENGINES={
         const sp=(t>e.n1?0.55:0.95);
         e.n1=clamp(e.n1+(t-e.n1)*Math.min(1,dt*sp*2.4),0.18,1);
         e.n2=clamp(lerp(e.n2,0.55+e.n1*0.45,Math.min(1,dt*2)),0,1.05);
-        e.egt=lerp(e.egt,380+e.n1*520,Math.min(1,dt*1.5));
+        if(!e.fire)e.egt=lerp(e.egt,380+e.n1*520,Math.min(1,dt*1.5));   // 起火时 EGT 由火焰主导,不被正常值拉回
         e.ff=clamp(0.3+e.n1*2.4,0,3.0);
         e.state='run';
       }
+      // 起火覆盖:EGT 飙升(>900 危险红线)+ 损害累计,久烧不灭→失效(蔓延由 failures.js 处理)
+      if(e.fire){
+        e.egt=Math.min(1150, e.egt+dt*230);
+        e.fireDmg=(e.fireDmg||0)+dt;
+        if(e.fireDmg>9 && (e.state==='run'||e.state==='idle'||e.state==='start'))e.state='fail';  // 久烧致失效
+      } else if(e.fireDmg>0){ e.fireDmg=Math.max(0,e.fireDmg-dt); }
     }
   },
   // 总推力(N):各发之和;地面反推取负

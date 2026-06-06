@@ -96,6 +96,8 @@ html,body{width:100%;height:100%;overflow:hidden;background:var(--bg);color:var(
 .n1num.failed{color:var(--red);}
 .n1tag{font-family:var(--mono);font-size:8px;color:var(--ink-faint2);}
 .egtnum{font-family:var(--mono);font-size:7px;color:var(--ink-faint2);margin-top:1px;}
+.egtnum.hot{color:var(--red);font-weight:700;text-shadow:0 0 6px rgba(255,74,61,.7);}
+.eng-gauges b.hot{color:var(--red);}
 .n1fill.failed{background:linear-gradient(180deg,#8a2a22,#3a1410)!important;box-shadow:none!important;}
 
 /* 油门 */

@@ -701,7 +701,7 @@ function syncRuntimeUI(){
       const f=$('n1fill'+e.id),nu=$('n1num'+e.id),eg=$('egt'+e.id);
       if(f){f.style.height=Math.round(e.n1*100)+'%';f.classList.toggle('rev',rev&&e.state==='run');f.classList.toggle('failed',e.state==='fail'||e.state==='off');}
       if(nu){nu.textContent=Math.round(e.n1*100);nu.classList.toggle('failed',e.state==='fail'||e.state==='off');}
-      if(eg)eg.textContent=Math.round(e.egt)+'°';
+      if(eg){eg.textContent=Math.round(e.egt)+'°';eg.classList.toggle('hot',e.egt>850);}
     }
   } else { const n1=avg; const f1=$('n1fillL'),f2=$('n1fillR');if(f1)f1.style.height=n1+'%';if(f2)f2.style.height=n1+'%'; }
   const pm={approach:'进近',flare:'拉平',rollout:'滑跑',goaround:'复飞',ended:'结束'};

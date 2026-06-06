@@ -35,12 +35,23 @@ const FAILURES={
 // —— 登记 6 种故障(本 tick:引擎类接 engines 验证连锁可行;余留 Tick3-5 填逻辑) ——
 function _eng0(){ return (typeof ENGINES!=='undefined'&&ENGINES.list.length)?ENGINES.list[0]:null; }
 FAILURES.register('engineFire',{ sys:'ENG', msg:'ENG 1 FIRE', level:'warning',
-  trigger(){ const e=_eng0(); if(e)e.fire=true; },
-  clear(){ const e=_eng0(); if(e)e.fire=false; } });
+  trigger(){ const e=_eng0(); if(e){e.fire=true;e.fireDmg=0;} },
+  clear(){ const e=_eng0(); if(e)e.fire=false; },
+  step(dt,f){ // 久烧不灭 → 蔓延邻发(15s 后)
+    const e=_eng0(); if(!e)return;
+    if((e.fireDmg||0)>15 && typeof ENGINES!=='undefined' && ENGINES.list[1] && !ENGINES.list[1].fire){
+      ENGINES.list[1].fire=true; f.msg='ENG 1+2 FIRE';
+    }
+  }});
 FAILURES.register('engineFail',{ sys:'ENG', msg:'ENG 1 FAIL', level:'warning',
   trigger(){ if(typeof ENGINES!=='undefined')ENGINES.failEngine(0,true); },
   clear(){ if(typeof ENGINES!=='undefined')ENGINES.failEngine(0,false); } });
-FAILURES.register('fuelLeak', { sys:'FUEL', msg:'FUEL LEAK', level:'caution' });   // Tick3 填漏油
+FAILURES.register('fuelLeak', { sys:'FUEL', msg:'FUEL LEAK', level:'caution',
+  trigger(){ if(typeof FUEL!=='undefined')FUEL.tanks.left.leak=10; },          // 左箱 10kg/s 漏
+  clear(){ if(typeof FUEL!=='undefined')FUEL.tanks.left.leak=0; },
+  step(dt,f){ // 总油量低 → 升级为 warning
+    if(typeof FUEL!=='undefined'){ f.level=FUEL.total()<2500?'warning':'caution'; f.msg=FUEL.total()<2500?'FUEL LOW · LEAK':'FUEL LEAK'; }
+  }});
 FAILURES.register('hydFail',  { sys:'HYD',  msg:'HYD LO PR',  level:'caution' });   // Tick4 填液压
 FAILURES.register('elecFail', { sys:'ELEC', msg:'ELEC FAULT', level:'caution' });   // Tick5 填电气
 FAILURES.register('tireBurst',{ sys:'GEAR', msg:'R TIRE BURST',level:'caution' });  // Tick5 填爆胎

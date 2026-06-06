@@ -93,7 +93,7 @@ PANELS.register('engine',{
       const st=g('estate'+e.id); if(st){st.textContent=e.state.toUpperCase();st.className='eng-state s-'+e.state;}
       if(g('eN1'+e.id))g('eN1'+e.id).textContent=Math.round(e.n1*100);
       if(g('eN2'+e.id))g('eN2'+e.id).textContent=Math.round(e.n2*100);
-      if(g('eEGT'+e.id))g('eEGT'+e.id).textContent=Math.round(e.egt);
+      if(g('eEGT'+e.id)){g('eEGT'+e.id).textContent=Math.round(e.egt);g('eEGT'+e.id).classList.toggle('hot',e.egt>850);}
       if(g('eFF'+e.id))g('eFF'+e.id).textContent=e.ff.toFixed(1);
       const col=host.querySelector('.eng-col[data-eng="'+(e.id-1)+'"]'); if(!col)continue;
       const set=(act,on)=>{const b=col.querySelector('[data-act='+act+']');if(b)b.classList.toggle('on',on);};

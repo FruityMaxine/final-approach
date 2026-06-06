@@ -8,11 +8,12 @@
 //==================================================================
 const FUEL={
   RATE:1.0,                        // FF→kg/s 标定
-  tanks:{ left:{qty:5500,cap:5500}, center:{qty:7000,cap:7000}, right:{qty:5500,cap:5500} },
+  tanks:{ left:{qty:5500,cap:5500,leak:0}, center:{qty:7000,cap:7000,leak:0}, right:{qty:5500,cap:5500,leak:0} },
   pump:{ left:true, center:true, right:true },
   xfeed:false,                     // 交输活门(默认关)
   starveT:0,
   reset(){ this.tanks.left.qty=5500; this.tanks.center.qty=7000; this.tanks.right.qty=5500;
+           this.tanks.left.leak=this.tanks.center.leak=this.tanks.right.leak=0;
            this.pump.left=this.pump.center=this.pump.right=true; this.xfeed=false; },
   total(){ return this.tanks.left.qty+this.tanks.center.qty+this.tanks.right.qty; },
   capTotal(){ return this.tanks.left.cap+this.tanks.center.cap+this.tanks.right.cap; },
@@ -35,6 +36,8 @@ const FUEL={
   },
   step(dt){
     if(typeof SYS!=='undefined'&&!SYS.get('features','fuelSystem'))return;   // 简化档:无限油
+    // 漏油(fuelLeak 故障置 tank.leak):持续流失,最终该侧发动机饥饿熄火
+    for(const k of ['left','center','right']){ const t=this.tanks[k]; if(t.leak>0)t.qty=Math.max(0,t.qty-t.leak*dt); }
     if(typeof ENGINES==='undefined')return;
     for(const e of ENGINES.list){
       if(e.state!=='run'&&e.state!=='idle'&&e.state!=='start')continue;
