@@ -36,7 +36,7 @@ betterloop-auditor(opus)审 **4/4 全 PASS**(2026-06-06 13:10)。挂接点全核
 
 ## 进度
 - [x] Tick1 计划(本文件 + auditor 4/4 PASS + 挂接点核实) — 2026-06-06
-- [ ] Tick2 v0.26 多机型性能库
+- [x] Tick2 v0.26 多机型性能库(aircraft.js 4机型档案/applyAircraft逐字段写AC+发动机数+燃油容量/起始速度按vref缩放/fuel.js reset按cap;切换真改气动+reload持久化实测PASS) — 2026-06-06
 - [ ] Tick3 v0.27 多机场航路库
 - [ ] Tick4 v0.28 飞行轨迹回放
 - [ ] Tick5 v0.29 导航显示 ND

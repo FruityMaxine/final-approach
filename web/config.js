@@ -30,7 +30,7 @@ const STARTS={
   cruise:{ name:'高位切入', z:-14500, alt:820, V:92, label:'7.8 NM · 2700 ft' },
 };
 // 当前配置(localStorage 持久化)
-const CONFIG={ diff:'real', start:'short', windDir:280, windSpeed:8, freeFlight:false, engines:2, weather:'clear' };
+const CONFIG={ diff:'real', start:'short', windDir:280, windSpeed:8, freeFlight:false, engines:2, weather:'clear', aircraft:'narrow' };
 const CFG_KEY='fa.config';
 
 function curDiff(){ return DIFF[CONFIG.diff]||DIFF.real; }
@@ -53,7 +53,7 @@ function applyDifficulty(d){
   applyWind();
   saveConfig();
 }
-function applyConfig(){ applyWind(); if(typeof WEATHER!=='undefined')WEATHER.preset(CONFIG.weather); saveConfig(); }
+function applyConfig(){ if(typeof applyAircraft==='function')applyAircraft(CONFIG.aircraft); applyWind(); if(typeof WEATHER!=='undefined')WEATHER.preset(CONFIG.weather); saveConfig(); }
 function saveConfig(){ try{localStorage.setItem(CFG_KEY,JSON.stringify(CONFIG));}catch(_){} }
 function loadConfig(){
   try{const v=JSON.parse(localStorage.getItem(CFG_KEY)||'null');
@@ -65,6 +65,7 @@ function loadConfig(){
       CONFIG.freeFlight=!!v.freeFlight;
       if(v.engines===2||v.engines===4)CONFIG.engines=v.engines;
       if(['clear','mist','imc','lowvis'].includes(v.weather))CONFIG.weather=v.weather;
+      if(typeof AIRCRAFT!=='undefined'&&AIRCRAFT[v.aircraft])CONFIG.aircraft=v.aircraft;
     }
   }catch(_){}
 }

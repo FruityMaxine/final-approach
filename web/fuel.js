@@ -12,7 +12,8 @@ const FUEL={
   pump:{ left:true, center:true, right:true },
   xfeed:false,                     // 交输活门(默认关)
   starveT:0,
-  reset(){ this.tanks.left.qty=5500; this.tanks.center.qty=7000; this.tanks.right.qty=5500;
+  reset(){ // qty 复位到当前 cap(支持机型库切换后的容量;applyAircraft 已写 cap)
+           this.tanks.left.qty=this.tanks.left.cap; this.tanks.center.qty=this.tanks.center.cap; this.tanks.right.qty=this.tanks.right.cap;
            this.tanks.left.leak=this.tanks.center.leak=this.tanks.right.leak=0;
            this.pump.left=this.pump.center=this.pump.right=true; this.xfeed=false; },
   total(){ return this.tanks.left.qty+this.tanks.center.qty+this.tanks.right.qty; },

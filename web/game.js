@@ -76,8 +76,9 @@ const WIND={ head:3, cross:1.7, gustMul:1, shear:false };
 let S={};
 function resetState(){
   const st=(typeof curStart==='function')?curStart():{z:-4520,alt:245,V:72};
+  const vF=(typeof curAircraftVref==='function')?(curAircraftVref()/140):1;   // 机型 vref 比例:重机进近更快,防换大机即失速
   S={
-    V:st.V, alt:st.alt, z:st.z, x:0,
+    V:st.V*vF, alt:st.alt, z:st.z, x:0,
     pitch:4.0, roll:0, hdg:0, gamma:-3.0*RAD,
     throttle:0.20, N1:0.25, flaps:2,
     gearDown:true, spoilerArmed:true, spoilerOut:false,
@@ -85,7 +86,7 @@ function resetState(){
     pitchIn:0, pitchInRaw:0, rollIn:0, rudder:0, rudderKbd:0, beta:0,
     phase:'approach', ended:false, started:false,
     touchdown:null, onGround:false, t:0, stall:false,
-    vTrend:0, lastV:72,
+    vTrend:0, lastV:st.V*vF,
     gustG:0, gustR:0, gustTheta:0,
     calls:{}, lastBand:9999,
   };
@@ -859,11 +860,16 @@ function updateWindUI(){
   const wb=$('windBadge');if(wb)wb.innerHTML='风 <b>'+CONFIG.windDir+'/'+('0'+CONFIG.windSpeed).slice(-2)+'</b>'+(curDiff().shear?' 切变':' 阵风');
   const bw=$('briefWind');if(bw)bw.textContent=CONFIG.windDir+'/'+('0'+CONFIG.windSpeed).slice(-2);
 }
+function updateAcUI(){
+  const v=$('cfgAcVal'); if(v&&typeof AIRCRAFT!=='undefined'){ const a=AIRCRAFT[CONFIG.aircraft]||AIRCRAFT.narrow; v.textContent=a.name+' · Vref '+a.vref; }
+}
 function syncConfigUI(){
   document.querySelectorAll('.seg-opt[data-diff]').forEach(s=>s.classList.toggle('on',s.dataset.diff===CONFIG.diff));
   document.querySelectorAll('.seg-opt[data-start]').forEach(s=>s.classList.toggle('on',s.dataset.start===CONFIG.start));
+  document.querySelectorAll('.seg-opt[data-ac]').forEach(s=>s.classList.toggle('on',s.dataset.ac===CONFIG.aircraft));
   document.querySelectorAll('.seg-opt[data-eng]').forEach(s=>s.classList.toggle('on',+s.dataset.eng===CONFIG.engines));
   document.querySelectorAll('.seg-opt[data-wx]').forEach(s=>s.classList.toggle('on',s.dataset.wx===CONFIG.weather));
+  updateAcUI();
   const ws=$('cfgWindSpeed');if(ws)ws.value=CONFIG.windSpeed;
   const wd=$('cfgWindDir');if(wd)wd.value=CONFIG.windDir;
   $('swFree').classList.toggle('on',CONFIG.freeFlight);
@@ -871,6 +877,12 @@ function syncConfigUI(){
 }
 document.querySelectorAll('.seg-opt[data-diff]').forEach(s=>s.addEventListener('click',()=>{applyDifficulty(s.dataset.diff);syncConfigUI();}));
 document.querySelectorAll('.seg-opt[data-start]').forEach(s=>s.addEventListener('click',()=>{CONFIG.start=s.dataset.start;saveConfig();syncConfigUI();}));
+document.querySelectorAll('.seg-opt[data-ac]').forEach(s=>s.addEventListener('click',()=>{
+  CONFIG.aircraft=s.dataset.ac;
+  if(typeof applyAircraft==='function')applyAircraft(CONFIG.aircraft);   // 逐字段写 AC + 发动机数 + 燃油容量
+  resetState();                                                          // 按新机型 vref 重置起始速度/状态
+  saveConfig(); syncConfigUI(); syncSysUI();
+}));
 document.querySelectorAll('.seg-opt[data-eng]').forEach(s=>s.addEventListener('click',()=>{CONFIG.engines=+s.dataset.eng;saveConfig();if(typeof ENGINES!=='undefined'){ENGINES.setCount(CONFIG.engines);resetState();}syncConfigUI();}));
 document.querySelectorAll('.seg-opt[data-wx]').forEach(s=>s.addEventListener('click',()=>{CONFIG.weather=s.dataset.wx;if(typeof WEATHER!=='undefined')WEATHER.preset(CONFIG.weather);saveConfig();syncConfigUI();}));
 $('cfgWindSpeed').addEventListener('input',e=>{CONFIG.windSpeed=+e.target.value;applyConfig();updateWindUI();});
