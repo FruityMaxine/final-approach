@@ -63,6 +63,7 @@ SYS.register('panels','elec',  {on:true,label:'电气面板',     desc:'电池 /
 SYS.register('panels','mcdu',  {on:true,label:'MCDU 飞控电脑',  desc:'屏幕四周 LSK + 键盘多页 CDU(旗舰件)'});
 SYS.register('panels','systems',{on:true,label:'系统总控',     desc:'所有功能/故障/环境/面板开关集中一处'});
 SYS.register('panels','replay', {on:true,label:'回放',         desc:'飞行轨迹复盘:下滑剖面+航迹+时间轴 scrub'});
+SYS.register('panels','nd',     {on:true,label:'ND 导航',      desc:'导航显示:航向环+航路点+跑道+ILS航道+风矢量+量程圈'});
 
 SYS.load();
 if(typeof window!=='undefined')window.SYS=SYS;

@@ -414,3 +414,11 @@ html[data-device=desktop] .sysbtn .kbdhint{display:block;}
 .rp-scrub::-moz-range-thumb{width:16px;height:16px;border-radius:50%;background:var(--cyan);border:2px solid #07121a;cursor:pointer;}
 .rp-readout{max-width:480px;margin:8px auto 0;font-family:var(--mono);font-size:11px;color:var(--ink-dim);letter-spacing:.02em;line-height:1.5;}
 .rp-readout b{color:var(--cyan);}
+/* ND 导航显示面板 */
+.nd-canvas{display:block;width:100%;max-width:380px;margin:4px auto 0;border:1px solid var(--edge);border-radius:8px;background:#060a10;}
+.nd-ctl{max-width:380px;margin:10px auto 0;display:flex;gap:6px;justify-content:center;}
+.nd-rng{font-family:var(--mono);font-size:11px;letter-spacing:.04em;color:var(--ink-dim);background:linear-gradient(180deg,#1a2030,#11151e);border:1px solid var(--edge2);border-radius:7px;padding:6px 12px;cursor:pointer;transition:.12s;}
+.nd-rng:hover{color:var(--ink);border-color:var(--edge3);}
+.nd-rng.on{color:var(--cyan);border-color:#1d6fb0;background:linear-gradient(180deg,#0c3a52,#08222f);box-shadow:0 0 8px rgba(42,216,255,.25);}
+.nd-readout{max-width:380px;margin:8px auto 0;font-family:var(--mono);font-size:11px;color:var(--ink-dim);letter-spacing:.02em;text-align:center;}
+.nd-readout b{color:var(--cyan);}
