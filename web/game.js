@@ -707,6 +707,7 @@ function syncRuntimeUI(){
   $('phasetxt').textContent=pm[S.phase]||S.phase;
   $('phaseBadge').classList.toggle('warn',S.phase==='flare'||S.phase==='goaround');
   if(S.phase!==_lastPhase){_lastPhase=S.phase;revealTags();}   // 相位变化短暂回显信息角标
+  if(typeof PANELS!=='undefined')PANELS.sync();                // 刷新当前打开面板读数
 }
 let _lastPhase='';
 let last=performance.now(),acc=0;const STEP=1/120;
@@ -818,6 +819,8 @@ if(typeof SYS!=='undefined'){
 }
 // 多发引擎:按配置初始化发动机数(默认 2,可配 4)+ 渲染 EICAS
 if(typeof ENGINES!=='undefined'){ ENGINES.setCount((typeof CONFIG!=='undefined'&&CONFIG.engines)||2); resetState(); }
+// 面板框架:建选择器 tab 条(飞行 + 引擎 + 后续数十种面板)
+if(typeof PANELS!=='undefined')PANELS.init();
 DeviceMode.init();
 if(typeof syncConfigUI==='function')syncConfigUI();
 setLayout();resizeWorld();resizePFD();

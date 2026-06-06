@@ -14,11 +14,11 @@ const ENGINES={
     n=(n===4?4:2); this.count=n;
     this.list=this.layout(n).map((x,i)=>({
       id:i+1, x, n1:0.25, n2:0.62, egt:430, ff:0.6,
-      state:'run', throttleOvr:null, fuelCut:false, fire:false, starter:false, ign:false
+      state:'run', throttleOvr:null, fuelCut:false, fire:false, starter:false, ign:false, pump:true
     }));
     if(typeof renderEICAS==='function')renderEICAS();
   },
-  reset(){ for(const e of this.list){ e.n1=0.25;e.n2=0.62;e.egt=430;e.ff=0.6;e.state='run';e.throttleOvr=null;e.fuelCut=false;e.fire=false;e.starter=false;e.ign=false; } },
+  reset(){ for(const e of this.list){ e.n1=0.25;e.n2=0.62;e.egt=430;e.ff=0.6;e.state='run';e.throttleOvr=null;e.fuelCut=false;e.fire=false;e.starter=false;e.ign=false;e.pump=true; } },
   anyRun(){ return this.list.some(e=>e.state==='run'||e.state==='idle'); },
   avgN1(){ if(!this.list.length)return 0; let s=0; for(const e of this.list)s+=e.n1; return s/this.list.length; },
 
